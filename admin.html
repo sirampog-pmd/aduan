@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Admin - Aduan Sirampog</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<!-- Library Leaflet untuk Peta -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- Library MarkerCluster agar pin tidak menumpuk -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+<script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Plus Jakarta Sans',sans-serif}
+:root{--primary:#1e40af;--primary-light:#3b82f6;--accent:#06b6d4;--bg:#0f172a;--card:#1e293b;--text:#f1f5f9;--muted:#94a3b8;--danger:#ef4444}
+body{background:var(--bg);color:var(--text);min-height:100vh}
+.hidden{display:none!important}
+
+/* Animated Background */
+.bg-anim{position:fixed;inset:0;z-index:-1;overflow:hidden}
+.blob{position:absolute;border-radius:50%;filter:blur(80px);opacity:.35;animation:float 20s infinite}
+.blob1{width:500px;height:500px;background:#3b82f6;top:-150px;left:-100px}
+.blob2{width:400px;height:400px;background:#06b6d4;bottom:-100px;right:-100px;animation-delay:-5s}
+@keyframes float{0%,100%{transform:translate(0,0)}33%{transform:translate(80px,-60px)}66%{transform:translate(-60px,60px)}}
+
+/* Login Page */
+#loginSection{display:flex;justify-content:center;align-items:center;min-height:100vh;padding:1rem}
+.login-box{background:rgba(30,41,59,.8);backdrop-filter:blur(20px);border:1px solid rgba(148,163,184,.2);border-radius:24px;padding:3rem 2.5rem;width:100%;max-width:420px;animation:fadeUp .6s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+.login-box .logo{font-size:2.5rem;text-align:center;margin-bottom:1rem}
+.login-box h1{text-align:center;font-size:1.5rem;margin-bottom:.5rem}
+.login-box p{text-align:center;color:var(--muted);font-size:.9rem;margin-bottom:2rem}
+
+/* Form Inputs */
+.form-group{margin-bottom:1.25rem}
+.form-group label{display:block;margin-bottom:.5rem;font-size:.875rem;font-weight:600;color:var(--muted)}
+.form-group input{width:100%;padding:.875rem 1rem;background:rgba(15,23,42,.6);border:1px solid rgba(148,163,184,.2);border-radius:12px;color:var(--text);font-family:inherit;font-size:.95rem;outline:none;transition:.3s}
+.form-group input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(6,182,212,.15)}
+.btn{padding:.875rem 1.5rem;border-radius:12px;font-weight:600;font-size:.95rem;cursor:pointer;border:none;transition:.3s;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;font-family:inherit}
+.btn-primary{background:linear-gradient(135deg,var(--primary-light),var(--accent));color:#fff;width:100%}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 25px rgba(59,130,246,.4)}
+.btn-primary:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.btn-sm{padding:.5rem 1rem;font-size:.8rem}
+.btn-outline{background:transparent;border:1px solid rgba(148,163,184,.3);color:var(--text);width:auto}
+.btn-outline:hover{background:rgba(255,255,255,.05)}
+
+/* Dashboard */
+.topbar{background:rgba(30,41,59,.8);backdrop-filter:blur(20px);border-bottom:1px solid rgba(148,163,184,.1);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+.topbar h2{font-size:1.1rem}
+.user-info{display:flex;align-items:center;gap:1rem;font-size:.9rem}
+.badge{padding:.25rem .75rem;border-radius:999px;font-size:.75rem;font-weight:600;background:rgba(239,68,68,.2);color:#fca5a5}
+.container{max-width:1100px;margin:0 auto;padding:2rem}
+
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin-bottom:2rem}
+.stat-card{background:rgba(30,41,59,.6);border:1px solid rgba(148,163,184,.15);border-radius:16px;padding:1.25rem;text-align:center}
+.stat-card .num{font-size:1.75rem;font-weight:800;color:var(--accent)}
+.stat-card .label{font-size:.8rem;color:var(--muted);margin-top:.25rem}
+
+.table-wrapper{background:rgba(30,41,59,.6);border:1px solid rgba(148,163,184,.15);border-radius:20px;overflow:hidden;margin-bottom:2rem}
+.table-header{padding:1.25rem 1.5rem;border-bottom:1px solid rgba(148,163,184,.1);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem; /* Memberi jarak antar elemen jika layar sempit */
+}
+.table-header h3{font-size:1rem}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th{text-align:left;padding:1rem 1.5rem;color:var(--muted);font-weight:600;font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;background:rgba(15,23,42,.3)}
+td{padding:1rem 1.5rem;border-top:1px solid rgba(148,163,184,.05)}
+tr:hover td{background:rgba(59,130,246,.05)}
+.status-badge{padding:.25rem .6rem;border-radius:6px;font-size:.7rem;font-weight:600}
+.status-baru{background:rgba(59,130,246,.2);color:#93c5fd}
+.status-proses{background:rgba(245,158,11,.2);color:#fcd34d}
+.status-selesai{background:rgba(16,185,129,.2);color:#6ee7b7}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+.custom-div-icon {
+  background: transparent;
+  border: none;
+}
+
+/* Toast */
+.toast{position:fixed;top:1.5rem;right:1.5rem;padding:1rem 1.5rem;background:linear-gradient(135deg,#10b981,#06b6d4);color:#fff;border-radius:12px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.3);transform:translateX(400px);transition:.4s;z-index:3000;max-width:320px}
+.toast.show{transform:translateX(0)}
+.toast.error{background:linear-gradient(135deg,#ef4444,#f97316)}
+
+@media(max-width:768px){
+  .topbar{padding:1rem}
+  .user-info span{display:none}
+  .table-wrapper{overflow-x:auto}
+  th,td{padding:.75rem 1rem;white-space:nowrap}
+}
+
+/* Modal CSS */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);display:none;place-items:center;z-index:2000;padding:1rem}
+.modal.open{display:grid}
+.modal-content{background:var(--card);border-radius:24px;padding:2rem;max-width:500px;width:100%;border:1px solid rgba(148,163,184,.2);animation:modalIn .4s cubic-bezier(.34,1.56,.64,1);max-height:90vh;overflow-y:auto;box-shadow: 0 20px 40px rgba(0,0,0,0.5);}
+@keyframes modalIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
+.form-group{margin-bottom:1.25rem}
+.form-group label{display:block;margin-bottom:.5rem;font-size:.875rem;font-weight:600;color:var(--muted)}
+.form-group input,.form-group textarea,.form-group select{width:100%;padding:.875rem 1rem;background:rgba(15,23,42,.6);border:1px solid rgba(148,163,184,.2);border-radius:12px;color:var(--text);font-family:inherit;font-size:.95rem;outline:none;transition:.3s}
+.form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(6,182,212,.15)}
+.form-group textarea{resize:vertical;min-height:100px}
+
+</style>
+</head>
+<body>
+
+<div class="bg-anim"><div class="blob blob1"></div><div class="blob blob2"></div></div>
+
+<!-- ========== LOGIN SECTION ========== -->
+<div id="loginSection">
+  <div class="login-box">
+    <div class="logo">🏛️</div>
+    <h1>Admin Panel</h1>
+    <p>Silakan login untuk mengelola aduan</p>
+    <form onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="loginUser" required placeholder="Masukkan username">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="loginPass" required placeholder="Masukkan password">
+      </div>
+      <button type="submit" class="btn btn-primary" id="btnLogin">Masuk 🔐</button>
+    </form>
+    <p style="margin-top:1.5rem;font-size:.8rem;text-align:center">
+      <a href="index.html" style="color:var(--muted);text-decoration:none">← Kembali ke Beranda</a>
+    </p>
+  </div>
+</div>
+
+<!-- ========== DASHBOARD SECTION ========== -->
+<div id="dashboardSection" class="hidden">
+  <div class="topbar">
+    <h2>🏛️ Dashboard Admin</h2>
+    <div class="user-info">
+      <span id="userNameDisplay"></span>
+      <span class="badge">ADMIN</span>
+      <button class="btn btn-outline btn-sm" onclick="logout()">Keluar</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-card"><div class="num" id="statTotal">0</div><div class="label">Total Aduan</div></div>
+      <div class="stat-card"><div class="num" id="statBaru">0</div><div class="label">Baru</div></div>
+      <div class="stat-card"><div class="num" id="statProses">0</div><div class="label">Diproses</div></div>
+      <div class="stat-card"><div class="num" id="statSelesai">0</div><div class="label">Selesai</div></div>
+    </div>
+
+	<!-- Peta Sebaran Aduan -->
+    <div class="table-wrapper" style="margin-bottom: 2rem; padding: 1.5rem;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+        <h3 style="font-size:1rem;">🗺️ Peta Sebaran Aduan</h3>
+        <small style="color:var(--muted); font-size:0.75rem;">Hanya menampilkan aduan yang memiliki titik koordinat.</small>
+      </div>
+      <div id="adminMap" style="height: 400px; border-radius: 12px; z-index: 1; border: 1px solid rgba(148,163,184,.3);"></div>
+    </div>
+	
+    <div class="table-wrapper">
+      <div class="table-header">
+        <h3>📋 Daftar Aduan Masuk</h3>
+        <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+          <input type="text" id="searchAdmin" placeholder="🔍 Cari Tiket/Nama/Lokasi..." style="padding:.5rem 1rem; border-radius:8px; border:1px solid rgba(148,163,184,.3); background:rgba(15,23,42,.6); color:#fff; font-size:.85rem; min-width:200px;" onkeyup="filterTable()">
+          
+          <select id="filterStatus" style="padding:.5rem 1rem; border-radius:8px; border:1px solid rgba(148,163,184,.3); background:rgba(15,23,42,.6); color:#fff; font-size:.85rem;" onchange="filterTable()">
+            <option value="">Semua Status</option>
+            <option value="Baru">Baru</option>
+            <option value="Diproses">Diproses</option>
+            <option value="Selesai">Selesai</option>
+          </select>
+
+          <select id="filterKategori" style="padding:.5rem 1rem; border-radius:8px; border:1px solid rgba(148,163,184,.3); background:rgba(15,23,42,.6); color:#fff; font-size:.85rem;" onchange="filterTable()">
+            <option value="">Semua Kategori</option>
+            <option value="Infrastruktur">Infrastruktur</option>
+            <option value="Administrasi">Administrasi</option>
+            <option value="Lingkungan">Lingkungan</option>
+            <option value="Pelayanan Publik">Pelayanan Publik</option>
+            <option value="Darurat">Darurat</option>
+            <option value="Saran & Masukan">Saran & Masukan</option>
+          </select>
+
+          <button class="btn btn-outline btn-sm" onclick="loadAduan()">🔄 Refresh</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>Tiket</th><th>Tanggal</th><th>Pelapor</th><th>Kategori</th><th>Lokasi</th><th>Foto</th><th>Peta</th><th>Status</th><th>Rating</th><th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="aduanTableBody">
+            <tr><td colspan="7" style="text-align:center;color:var(--muted)">Memuat data...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Update Status & Catatan -->
+<div class="modal" id="updateModal">
+  <div class="modal-content">
+    <h3 style="font-size:1.5rem; margin-bottom:1.5rem; display:flex; align-items:center; gap:.5rem;">📝 Update Progres Aduan</h3>
+    <form onsubmit="submitUpdateStatus(event)">
+      <input type="hidden" id="updTicketId">
+      
+      <div class="form-group">
+        <label>Status Aduan</label>
+        <select id="updStatus" required>
+          <option value="Baru">🟦 Baru</option>
+          <option value="Diproses">🟨 Diproses</option>
+          <option value="Selesai">🟩 Selesai</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label>Catatan Progres (Akan dilihat warga)</label>
+        <textarea id="updCatatan" rows="4" placeholder="Contoh: Sedang dilakukan survei lokasi oleh Dinas PU..."></textarea>
+      </div>
+      
+      <div style="display:flex;gap:.75rem;margin-top:1.5rem">
+        <button type="button" class="btn btn-outline" style="flex:1" onclick="closeUpdateModal()">Batal</button>
+        <button type="submit" class="btn btn-primary" style="flex:1" id="btnSubmitUpdate">Simpan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Chat Admin -->
+<div class="modal" id="chatModal">
+  <div class="modal-content" style="max-width: 600px;">
+    <h3 style="font-size:1.5rem; margin-bottom:1rem;">💬 Balas Aduan <span id="chatTicketId" style="color:var(--accent)"></span></h3>
+    
+    <div id="chatAdminMessages" style="max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1rem; background: rgba(15,23,42,.4); padding: 1rem; border-radius: 12px;"></div>
+    
+    <div style="display: flex; gap: 0.5rem;">
+      <input type="text" id="chatAdminInput" placeholder="Ketik balasan..." style="flex:1; padding:0.75rem; border-radius:8px; border:1px solid rgba(148,163,184,.3); background:rgba(15,23,42,.6); color:#fff;">
+      <button onclick="kirimPesanAdmin()" class="btn btn-primary" style="padding:0.75rem 1.5rem; width:auto;">Kirim</button>
+    </div>
+    
+    <div style="text-align:right; margin-top:1rem;">
+      <button type="button" class="btn btn-outline" onclick="tutupChatModal()">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// GANTI DENGAN URL WEB APP ANDA
+const API_URL = 'https://script.google.com/macros/s/AKfycbxirvmiS8VchvTQh5G8Y5WkUZX5jbVKLIbh26OjhaMqXBRlFCLNa9ITOoIWiIYKydcfQw/exec';
+
+let currentUser = null;
+let allAduanData = [];
+let adminMap = null;
+let markerClusterGroup = null; 
+
+// ============ API HELPERS ============
+async function apiPost(payload) {
+  const res = await fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload),
+    redirect: 'follow'
+  });
+  return res.json();
+}
+
+async function apiGet(action, params = {}) {
+  const url = new URL(API_URL);
+  url.searchParams.set('action', action);
+  Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+  const res = await fetch(url.toString(), { redirect: 'follow' });
+  return res.json();
+}
+
+// ============ LOGIN ============
+async function handleLogin(e) {
+  e.preventDefault();
+  const user = document.getElementById('loginUser').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  const btn = document.getElementById('btnLogin');
+  
+  btn.disabled = true;
+  btn.textContent = 'Memproses...';
+  
+  try {
+    const res = await apiPost({ action: 'login', username: user, password: pass });
+    if (res.success) {
+      if (res.user.role !== 'admin') {
+        showToast('Akun ini bukan admin!', true);
+        btn.disabled = false;
+        btn.textContent = 'Masuk 🔐';
+        return;
+      }
+      currentUser = res.user;
+      sessionStorage.setItem('sirampog_admin', JSON.stringify(res.user));
+      showDashboard();
+      showToast('Selamat datang, ' + res.user.nama);
+    } else {
+      showToast(res.message, true);
+    }
+  } catch(err) {
+    showToast('Error: ' + err.message, true);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Masuk 🔐';
+  }
+}
+
+function logout() {
+  currentUser = null;
+  sessionStorage.removeItem('sirampog_admin');
+  document.getElementById('dashboardSection').classList.add('hidden');
+  document.getElementById('loginSection').classList.remove('hidden');
+  document.getElementById('loginUser').value = '';
+  document.getElementById('loginPass').value = '';
+}
+
+// ============ DASHBOARD ============
+function showDashboard() {
+  document.getElementById('loginSection').classList.add('hidden');
+  document.getElementById('dashboardSection').classList.remove('hidden');
+  document.getElementById('userNameDisplay').textContent = currentUser.nama;
+  loadAduan();
+}
+
+async function loadAduan() {
+  const tbody = document.getElementById('aduanTableBody');
+  tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--muted)">Memuat data...</td></tr>';
+  
+  try {
+    const data = await apiGet('getAllAduan');
+    if (data.error) throw new Error(data.error);
+    
+    // Simpan ke variabel global
+    allAduanData = data || [];
+    
+    // Render dengan data yang sudah disaring
+    filterTable();
+    updateStats(allAduanData);
+  } catch(err) {
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--danger)">Gagal memuat: ' + err.message + '</td></tr>';
+  }
+}
+
+function filterTable() {
+  const searchTerm = document.getElementById('searchAdmin').value.toLowerCase();
+  const statusFilter = document.getElementById('filterStatus').value;
+  const kategoriFilter = document.getElementById('filterKategori').value;
+
+  // Proses filter data
+  const filteredData = allAduanData.filter(row => {
+    // 1. Cek Pencarian (Tiket, Nama, Lokasi)
+    const matchSearch = 
+      (row.TicketID || '').toLowerCase().includes(searchTerm) ||
+      (row.Username || '').toLowerCase().includes(searchTerm) ||
+      (row.Lokasi || '').toLowerCase().includes(searchTerm);
+      
+    // 2. Cek Filter Status
+    const matchStatus = statusFilter === '' || row.Status === statusFilter;
+    
+    // 3. Cek Filter Kategori
+    const matchKategori = kategoriFilter === '' || row.Kategori === kategoriFilter;
+
+    return matchSearch && matchStatus && matchKategori;
+  });
+
+  // Render ulang tabel dengan data yang sudah disaring
+  renderTable(filteredData);
+  updateMapMarkers(filteredData); 
+  // Update statistik bagian atas (opsional, memantau hasil filter)
+  updateStats(filteredData);
+}
+
+function renderTable(data) {
+  const tbody = document.getElementById('aduanTableBody');
+  if (!data || data.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--muted)">Belum ada aduan.</td></tr>';
+    return;
+  }
+  
+  const sorted = [...data].reverse();
+  
+  tbody.innerHTML = sorted.map(row => {
+    const statusClass = row.Status === 'Baru' ? 'status-baru' : 
+                        row.Status === 'Diproses' ? 'status-proses' : 'status-selesai';
+    
+    let ratingBintang = '-';
+    if (row.Rating && row.Rating !== '') {
+      ratingBintang = '⭐'.repeat(Number(row.Rating));
+    }
+
+    const fotoLink = (row.Foto && row.Foto !== '-') 
+      ? `<a href="${row.Foto}" target="_blank" style="color:var(--accent)">Lihat 📸</a>` : '-';
+      
+    const petaLink = (row.Latitude && row.Longitude) 
+      ? `<a href="https://www.google.com/maps?q=${row.Latitude},${row.Longitude}" target="_blank" style="color:var(--accent)">Buka 🗺️</a>` : '-';
+      
+    const tgl = row.Tanggal ? new Date(row.Tanggal).toLocaleDateString('id-ID') : '-';
+    const catatanAman = (row.Catatan_Progres || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
+    let aksi = `<td>
+      <button onclick="openUpdateModal('${row.TicketID}', '${row.Status}', '${catatanAman}')" class="btn btn-primary" style="padding:.4rem .8rem;font-size:.75rem;border-radius:6px;width:auto; margin-bottom:.25rem">
+        Edit Progres
+      </button>
+      <button onclick="bukaChatModal('${row.TicketID}')" class="btn btn-outline" style="padding:.4rem .8rem;font-size:.75rem;border-radius:6px;width:auto">
+        💬 Balas
+      </button>
+    </td>`;
+
+    return `<tr>
+      <td><strong>${row.TicketID}</strong></td>
+      <td>${tgl}</td>
+      <td>${row.Username || '-'}</td>
+      <td>${row.Kategori}</td>
+      <td>${row.Lokasi}</td>
+      <td>${fotoLink}</td>
+      <td>${petaLink}</td>
+      <td><span class="status-badge ${statusClass}">${row.Status}</span></td>
+      <td style="color:#fbbf24; font-size:1.1rem">${ratingBintang}</td>
+      ${aksi}
+    </tr>`;
+  }).join('');
+}
+
+
+function updateStats(data) {
+  document.getElementById('statTotal').textContent = data.length;
+  document.getElementById('statBaru').textContent = data.filter(d => d.Status === 'Baru').length;
+  document.getElementById('statProses').textContent = data.filter(d => d.Status === 'Diproses').length;
+  document.getElementById('statSelesai').textContent = data.filter(d => d.Status === 'Selesai').length;
+}
+
+async function updateStatus(ticketId, newStatus) {
+  try {
+    const res = await apiPost({
+      action: 'updateStatus',
+      ticketId, newStatus,
+      adminUsername: currentUser.username
+    });
+    if (res.success) {
+      showToast('Status ' + ticketId + ' → ' + newStatus);
+      loadAduan();
+    } else {
+      showToast('Gagal: ' + (res.message || res.error), true);
+    }
+  } catch(err) {
+    showToast('Error: ' + err.message, true);
+  }
+}
+
+// ============ UTILS ============
+function showToast(msg, isError = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (isError ? ' error' : '');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+function openUpdateModal(ticketId, currentStatus, currentCatatan) {
+  document.getElementById('updTicketId').value = ticketId;
+  document.getElementById('updStatus').value = currentStatus;
+  
+  // Bersihkan formatting aneh pada string catatan
+  let cleanCatatan = currentCatatan || '';
+  if (cleanCatatan === 'undefined') cleanCatatan = '';
+  document.getElementById('updCatatan').value = cleanCatatan;
+  
+  // Menggunakan class 'open' agar sesuai dengan CSS
+  document.getElementById('updateModal').classList.add('open');
+}
+
+function closeUpdateModal() {
+  document.getElementById('updateModal').classList.remove('open');
+}
+
+async function submitUpdateStatus(e) {
+  e.preventDefault();
+  const btn = document.getElementById('btnSubmitUpdate');
+  btn.disabled = true;
+  btn.textContent = 'Menyimpan...';
+
+  const ticketId = document.getElementById('updTicketId').value;
+  const newStatus = document.getElementById('updStatus').value;
+  const catatan = document.getElementById('updCatatan').value;
+
+  try {
+    const res = await apiPost({
+      action: 'updateStatus',
+      ticketId: ticketId,
+      newStatus: newStatus,
+      catatan: catatan,
+      adminUsername: currentUser.username
+    });
+    
+    if (res.success) {
+      showToast('Progres aduan berhasil diupdate!');
+      closeUpdateModal();
+      loadAduan();
+    } else {
+      showToast('Gagal: ' + (res.message || res.error), true);
+    }
+  } catch(err) {
+    showToast('Error koneksi: ' + err.message, true);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Simpan';
+  }
+}
+
+// Tutup modal jika klik di luar area
+window.addEventListener('click', e => {
+  if(e.target.id === 'updateModal') closeUpdateModal();
+});
+
+// ============ FITUR CHAT ADMIN ============
+let currentChatTicket = null;
+
+function bukaChatModal(ticketId) {
+  currentChatTicket = ticketId;
+  document.getElementById('chatTicketId').textContent = ticketId;
+  document.getElementById('chatModal').classList.add('open');
+  loadChatAdmin(ticketId);
+}
+
+function tutupChatModal() {
+  document.getElementById('chatModal').classList.remove('open');
+  currentChatTicket = null;
+}
+
+async function loadChatAdmin(ticketId) {
+  const chatBox = document.getElementById('chatAdminMessages');
+  chatBox.innerHTML = '<div style="text-align:center; font-size:0.8rem; color:var(--muted);">Memuat chat...</div>';
+  
+  try {
+    const res = await fetch(API_URL + '?action=getPesan&ticketId=' + ticketId);
+    const result = await res.json();
+    
+    if (result.success && result.data.length > 0) {
+      chatBox.innerHTML = result.data.map(msg => {
+        const isAdmin = msg.Pengirim === 'Admin';
+        const bubbleClass = isAdmin ? 'chat-admin' : 'chat-warga';
+        const name = isAdmin ? 'Anda (Admin)' : msg.Pengirim;
+        const tgl = new Date(msg.Tanggal).toLocaleString('id-ID', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
+        
+        return `
+          <div class="chat-bubble ${bubbleClass}">
+            <span class="chat-meta">${name} • ${tgl}</span>
+            ${msg.Pesan}
+          </div>
+        `;
+      }).join('');
+      chatBox.scrollTop = chatBox.scrollHeight;
+    } else {
+      chatBox.innerHTML = '<div style="text-align:center; font-size:0.8rem; color:var(--muted);">Belum ada percakapan.</div>';
+    }
+  } catch(e) { console.error(e); }
+}
+
+async function kirimPesanAdmin() {
+  const input = document.getElementById('chatAdminInput');
+  const pesan = input.value.trim();
+  if(!pesan || !currentChatTicket) return;
+  
+  input.disabled = true;
+  
+  try {
+    const res = await apiPost({
+      action: 'kirimPesan',
+      ticketId: currentChatTicket,
+      pengirim: 'Admin',
+      pesan: pesan
+    });
+    
+    if (res.success) {
+      input.value = '';
+      loadChatAdmin(currentChatTicket); // Refresh chat
+    } else {
+      showToast('Gagal mengirim pesan', true);
+    }
+  } catch(e) {
+    showToast('Error koneksi', true);
+  } finally {
+    input.disabled = false;
+    input.focus();
+  }
+}
+
+// Tutup modal jika klik di luar
+window.addEventListener('click', e => {
+  if(e.target.id === 'chatModal') tutupChatModal();
+});
+
+function initAdminMap() {
+  // Cegah inisialisasi ganda
+  if (adminMap) return;
+
+  // Koordinat tengah (Sirampog)
+  const defaultLat = -7.2333;
+  const defaultLng = 108.8833;
+
+  adminMap = L.map('adminMap').setView([defaultLat, defaultLng], 11);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap'
+  }).addTo(adminMap);
+
+  // Inisialisasi Cluster Group
+  markerClusterGroup = L.markerClusterGroup();
+  adminMap.addLayer(markerClusterGroup);
+}
+function updateMapMarkers(data) {
+  if (!adminMap || !markerClusterGroup) return;
+  
+  // Hapus marker lama
+  markerClusterGroup.clearLayers();
+
+  let validMarkers = 0;
+
+  data.forEach(row => {
+    // Hanya render jika ada koordinat Lat & Lng
+    if (row.Latitude && row.Longitude && row.Latitude !== '' && row.Longitude !== '') {
+      const lat = parseFloat(row.Latitude);
+      const lng = parseFloat(row.Longitude);
+      
+      // Pilih warna berdasarkan status
+      let markerColor = '#3b82f6'; // Biru (Baru)
+      if (row.Status === 'Diproses') markerColor = '#f59e0b'; // Kuning
+      if (row.Status === 'Selesai') markerColor = '#10b981'; // Hijau
+
+      // Custom Icon
+      const customIcon = L.divIcon({
+        className: 'custom-div-icon',
+        html: `<div style="background-color:${markerColor}; width: 14px; height: 14px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 5px rgba(0,0,0,0.5);"></div>`,
+        iconSize: [20, 20],
+        iconAnchor: [10, 10]
+      });
+
+      const marker = L.marker([lat, lng], { icon: customIcon });
+      
+      // Konten Popup
+      const popupContent = `
+        <div style="font-family: 'Plus Jakarta Sans', sans-serif; min-width: 150px;">
+          <strong style="color:${markerColor}; font-size:14px;">${row.TicketID}</strong><br>
+          <span style="font-size:12px; color:#333;">${row.Kategori}</span><br>
+          <span style="font-size:11px; color:#666;">📍 ${row.Lokasi}</span><br>
+          <span style="font-size:11px; font-weight:bold;">Status: ${row.Status}</span>
+        </div>
+      `;
+      
+      marker.bindPopup(popupContent);
+      markerClusterGroup.addLayer(marker);
+      validMarkers++;
+    }
+  });
+
+  // Jika ada marker, sesuaikan zoom peta agar semua terlihat
+  if (validMarkers > 0) {
+    adminMap.fitBounds(markerClusterGroup.getBounds(), { padding: [30, 30] });
+  }
+}
+function showDashboard() {
+  document.getElementById('loginSection').classList.add('hidden');
+  document.getElementById('dashboardSection').classList.remove('hidden');
+  document.getElementById('userNameDisplay').textContent = currentUser.nama;
+  
+  // Inisialisasi peta saat dashboard muncul
+  setTimeout(() => { initAdminMap(); }, 300); 
+  
+  loadAduan();
+}
+
+// Cek Sesi Login saat halaman dimuat
+window.addEventListener('DOMContentLoaded', () => {
+  const saved = sessionStorage.getItem('sirampog_admin');
+  if (saved) {
+    try {
+      currentUser = JSON.parse(saved);
+      showDashboard();
+    } catch(e) { sessionStorage.removeItem('sirampog_admin'); }
+  }
+});
+</script>
+</body>
+</html>
