@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aduan Sirampog - Layanan Pengaduan Masyarakat</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+  #map { 
+    height: 300px; /* Diperbesar dari 250px */
+    border-radius: 12px; 
+    margin-top: .5rem; 
+    z-index: 1; 
+    border: 1px solid rgba(148,163,184,.3); /* Border agar menyatu dengan input form */
+  }
+  .leaflet-container { 
+    font-family: inherit; 
+    background-color: #0f172a; /* Warna gelap saat peta memuat */
+  }
+</style>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Plus Jakarta Sans',sans-serif}
+:root{--primary:#1e40af;--primary-light:#3b82f6;--accent:#06b6d4;--bg:#0f172a;--card:#1e293b;--text:#f1f5f9;--muted:#94a3b8;--danger:#ef4444;--success:#10b981}
+body{background:var(--bg);color:var(--text);overflow-x:hidden;min-height:100vh}
+
+/* Animated Background */
+.bg-anim{position:fixed;inset:0;z-index:-1;overflow:hidden}
+.blob{position:absolute;border-radius:50%;filter:blur(80px);opacity:.35;animation:float 20s infinite}
+.blob1{width:500px;height:500px;background:#3b82f6;top:-150px;left:-100px}
+.blob2{width:400px;height:400px;background:#06b6d4;bottom:-100px;right:-100px;animation-delay:-5s}
+.blob3{width:350px;height:350px;background:#8b5cf6;top:40%;left:40%;animation-delay:-10s}
+@keyframes float{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(80px,-60px) scale(1.1)}66%{transform:translate(-60px,60px) scale(.9)}}
+
+/* Navbar */
+nav{position:sticky;top:0;z-index:100;backdrop-filter:blur(20px);background:rgba(15,23,42,.7);border-bottom:1px solid rgba(148,163,184,.1);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center}
+.logo{display:flex;align-items:center;gap:.75rem;font-weight:800;font-size:1.25rem}
+.logo-icon{width:42px;height:42px;background:linear-gradient(135deg,var(--primary-light),var(--accent));border-radius:12px;display:grid;place-items:center;font-size:1.4rem;animation:pulse 3s infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+nav ul{display:flex;gap:2rem;list-style:none;align-items:center}
+nav a{color:var(--muted);text-decoration:none;font-weight:500;transition:.3s;position:relative}
+nav a:hover{color:var(--text)}
+nav a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:2px;background:var(--accent);transition:.3s}
+nav a:hover::after{width:100%}
+
+/* Hero */
+.hero{padding:5rem 2rem 3rem;text-align:center;max-width:1000px;margin:0 auto}
+.hero-badge{display:inline-block;padding:.5rem 1.25rem;background:rgba(6,182,212,.15);border:1px solid rgba(6,182,212,.3);border-radius:999px;color:var(--accent);font-size:.875rem;font-weight:600;margin-bottom:1.5rem;animation:fadeUp .8s ease}
+.hero h1{font-size:clamp(2rem,5vw,3.75rem);font-weight:800;line-height:1.1;margin-bottom:1.25rem;animation:fadeUp .8s ease .1s both;background:linear-gradient(135deg,#fff 30%,#93c5fd 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{font-size:1.125rem;color:var(--muted);max-width:600px;margin:0 auto 2rem;animation:fadeUp .8s ease .2s both}
+.hero-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;animation:fadeUp .8s ease .3s both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+
+.btn{padding:1rem 2rem;border-radius:14px;font-weight:600;font-size:1rem;cursor:pointer;border:none;transition:.3s;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;text-decoration:none;font-family:inherit}
+.btn-primary{background:linear-gradient(135deg,var(--primary-light),var(--accent));color:#fff;box-shadow:0 10px 30px rgba(59,130,246,.4)}
+.btn-primary:hover{transform:translateY(-3px);box-shadow:0 15px 40px rgba(59,130,246,.6)}
+.btn-primary:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.btn-outline{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);color:var(--text);backdrop-filter:blur(10px)}
+.btn-outline:hover{background:rgba(255,255,255,.1);transform:translateY(-3px)}
+
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1.5rem;max-width:900px;margin:3rem auto 0;padding:0 2rem;animation:fadeUp .8s ease .4s both}
+.stat{background:rgba(30,41,59,.6);backdrop-filter:blur(20px);border:1px solid rgba(148,163,184,.15);border-radius:20px;padding:1.5rem;text-align:center;transition:.3s}
+.stat:hover{transform:translateY(-5px);border-color:var(--accent)}
+.stat-num{font-size:2rem;font-weight:800;background:linear-gradient(135deg,var(--primary-light),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-label{color:var(--muted);font-size:.875rem;margin-top:.25rem}
+
+/* Sections */
+.section{max-width:1100px;margin:0 auto;padding:4rem 2rem}
+.section-title{text-align:center;margin-bottom:3rem}
+.section-title h2{font-size:clamp(1.75rem,4vw,2.5rem);font-weight:800;margin-bottom:.75rem}
+.section-title p{color:var(--muted);font-size:1.05rem}
+
+/* Cards */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.5rem}
+.card{background:rgba(30,41,59,.6);backdrop-filter:blur(20px);border:1px solid rgba(148,163,184,.15);border-radius:20px;padding:2rem;transition:.4s;cursor:default;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(59,130,246,.1),transparent);opacity:0;transition:.4s}
+.card:hover{transform:translateY(-8px);border-color:var(--accent);box-shadow:0 20px 40px rgba(0,0,0,.3)}
+.card:hover::before{opacity:1}
+.card-icon{width:56px;height:56px;background:linear-gradient(135deg,rgba(59,130,246,.2),rgba(6,182,212,.2));border-radius:16px;display:grid;place-items:center;font-size:1.75rem;margin-bottom:1.25rem;position:relative}
+.card h3{font-size:1.25rem;margin-bottom:.75rem;position:relative}
+.card p{color:var(--muted);line-height:1.6;font-size:.95rem;position:relative}
+
+/* Lacak Aduan Section */
+.track-container{max-width:600px;margin:0 auto;background:rgba(30,41,59,.6);border:1px solid rgba(148,163,184,.15);border-radius:24px;padding:2.5rem;backdrop-filter:blur(20px)}
+.track-form{display:flex;gap:.75rem}
+.track-form input{flex:1;padding:1rem 1.25rem;background:rgba(15,23,42,.8);border:1px solid rgba(148,163,184,.3);border-radius:12px;color:var(--text);font-family:inherit;font-size:1rem;outline:none;transition:.3s;text-transform:uppercase}
+.track-form input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(6,182,212,.15)}
+.track-result{margin-top:2rem;display:none;animation:fadeUp .4s ease}
+.track-card{background:rgba(15,23,42,.6);border-left:4px solid var(--accent);border-radius:12px;padding:1.5rem;text-align:left}
+.track-row{display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px dashed rgba(148,163,184,.2);font-size:.95rem}
+.track-row:last-child{border-bottom:none}
+.track-row span:first-child{color:var(--muted)}
+.track-row span:last-child{font-weight:600}
+.badge-status{padding:.25rem .75rem;border-radius:999px;font-size:.8rem;font-weight:600;display:inline-block}
+.bg-baru{background:rgba(59,130,246,.2);color:#93c5fd}
+.bg-proses{background:rgba(245,158,11,.2);color:#fcd34d}
+.bg-selesai{background:rgba(16,185,129,.2);color:#6ee7b7}
+.track-error{color:var(--danger);text-align:center;font-weight:500;background:rgba(239,68,68,.1);padding:1rem;border-radius:12px;border:1px solid rgba(239,68,68,.3)}
+
+/* Chat Widget */
+.chat-toggle{position:fixed;bottom:2rem;right:2rem;width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--primary-light),var(--accent));border:none;cursor:pointer;display:grid;place-items:center;font-size:1.75rem;color:#fff;box-shadow:0 10px 30px rgba(6,182,212,.5);z-index:1000;transition:.3s;animation:bounce 2s infinite}
+.chat-toggle:hover{transform:scale(1.1);animation:none}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+
+.chat-window{position:fixed;bottom:2rem;right:2rem;width:380px;height:600px;max-height:80vh;background:var(--card);border-radius:24px;box-shadow:0 25px 60px rgba(0,0,0,.5);display:flex;flex-direction:column;overflow:hidden;z-index:1001;opacity:0;transform:scale(.8) translateY(20px);pointer-events:none;transition:.4s cubic-bezier(.34,1.56,.64,1);border:1px solid rgba(148,163,184,.2)}
+.chat-window.open{opacity:1;transform:scale(1) translateY(0);pointer-events:all}
+
+.chat-header{background:linear-gradient(135deg,var(--primary),var(--primary-light));padding:1.25rem;display:flex;align-items:center;gap:.75rem;color:#fff}
+.chat-avatar{width:44px;height:44px;background:rgba(255,255,255,.2);border-radius:50%;display:grid;place-items:center;font-size:1.4rem;backdrop-filter:blur(10px)}
+.chat-header-info h4{font-size:1rem;font-weight:700}
+.chat-header-info span{font-size:.75rem;opacity:.9;display:flex;align-items:center;gap:.35rem}
+.online-dot{width:8px;height:8px;background:#22c55e;border-radius:50%;animation:pulse-dot 2s infinite}
+@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.4}}
+.chat-close{margin-left:auto;background:rgba(255,255,255,.15);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1rem;transition:.3s}
+.chat-close:hover{background:rgba(255,255,255,.3);transform:rotate(90deg)}
+
+.chat-body{flex:1;overflow-y:auto;padding:1.25rem;display:flex;flex-direction:column;gap:1rem;background:rgba(15,23,42,.4)}
+.chat-body::-webkit-scrollbar{width:6px}
+.chat-body::-webkit-scrollbar-thumb{background:rgba(148,163,184,.3);border-radius:3px}
+
+.msg{max-width:80%;padding:.75rem 1rem;border-radius:16px;font-size:.9rem;line-height:1.5;animation:msgIn .3s ease}
+@keyframes msgIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.msg.bot{background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.3);align-self:flex-start;border-bottom-left-radius:4px}
+.msg.user{background:linear-gradient(135deg,var(--primary-light),var(--accent));color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+
+.typing{display:flex;gap:.25rem;padding:.75rem 1rem}
+.typing span{width:8px;height:8px;background:var(--muted);border-radius:50%;animation:typing 1.4s infinite}
+.typing span:nth-child(2){animation-delay:.2s}
+.typing span:nth-child(3){animation-delay:.4s}
+@keyframes typing{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-6px);opacity:1}}
+
+.chat-quick{display:flex;gap:.5rem;padding:0 1.25rem .75rem;flex-wrap:wrap;background:rgba(15,23,42,.4)}
+.quick-btn{padding:.5rem .875rem;background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.3);color:var(--accent);border-radius:999px;font-size:.75rem;cursor:pointer;transition:.3s;font-family:inherit;font-weight:500}
+.quick-btn:hover{background:rgba(59,130,246,.3);transform:translateY(-2px)}
+
+.chat-input{display:flex;gap:.5rem;padding:1rem 1.25rem;background:var(--card);border-top:1px solid rgba(148,163,184,.15)}
+.chat-input input{flex:1;padding:.75rem 1rem;background:rgba(15,23,42,.6);border:1px solid rgba(148,163,184,.2);border-radius:12px;color:var(--text);font-family:inherit;font-size:.9rem;outline:none;transition:.3s}
+.chat-input input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(6,182,212,.15)}
+.chat-input button{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--primary-light),var(--accent));border:none;color:#fff;cursor:pointer;font-size:1.1rem;transition:.3s;display:grid;place-items:center}
+.chat-input button:hover{transform:scale(1.05);box-shadow:0 5px 15px rgba(6,182,212,.4)}
+
+/* Form modal */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);display:none;place-items:center;z-index:2000;padding:1rem}
+.modal.open{display:grid}
+.modal-content{background:var(--card);border-radius:24px;padding:2rem;max-width:500px;width:100%;border:1px solid rgba(148,163,184,.2);animation:modalIn .4s cubic-bezier(.34,1.56,.64,1);max-height:90vh;overflow-y:auto}
+@keyframes modalIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
+.modal-content h3{font-size:1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:.5rem}
+.form-group{margin-bottom:1.25rem}
+.form-group label{display:block;margin-bottom:.5rem;font-size:.875rem;font-weight:600;color:var(--muted)}
+.form-group input,.form-group textarea,.form-group select{width:100%;padding:.875rem 1rem;background:rgba(15,23,42,.6);border:1px solid rgba(148,163,184,.2);border-radius:12px;color:var(--text);font-family:inherit;font-size:.95rem;outline:none;transition:.3s}
+.form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(6,182,212,.15)}
+.form-group textarea{resize:vertical;min-height:100px}
+
+/* Toast */
+.toast{position:fixed;top:2rem;right:2rem;padding:1rem 1.5rem;background:linear-gradient(135deg,#10b981,#06b6d4);color:#fff;border-radius:12px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.3);transform:translateX(400px);transition:.4s;z-index:3000;display:flex;align-items:center;gap:.5rem}
+.toast.show{transform:translateX(0)}
+.toast.error{background:linear-gradient(135deg,#ef4444,#f97316)}
+
+/* Footer */
+footer{text-align:center;padding:3rem 2rem;color:var(--muted);font-size:.875rem;border-top:1px solid rgba(148,163,184,.1);margin-top:4rem}
+footer a{color:var(--muted);text-decoration:none;transition:.3s}
+footer a:hover{color:var(--accent)}
+
+@media(max-width:768px){
+  nav{padding:.875rem 1rem}
+  nav ul{display:none}
+  .chat-window{width:calc(100vw - 2rem);right:1rem;bottom:1rem;height:calc(100vh - 2rem);max-height:none}
+  .chat-toggle{right:1rem;bottom:1rem}
+  .hero{padding:3rem 1.5rem 2rem}
+  .section{padding:3rem 1.5rem}
+  .track-form{flex-direction:column}
+  .track-form button{width:100%}
+}
+/* Chat Publik */
+.chat-bubble { padding: 0.75rem; border-radius: 12px; font-size: 0.85rem; max-width: 85%; line-height:1.4; }
+.chat-warga { background: rgba(59,130,246,.2); border: 1px solid rgba(59,130,246,.3); align-self: flex-start; border-bottom-left-radius: 4px; }
+.chat-admin { background: rgba(16,185,129,.15); border: 1px solid rgba(16,185,129,.3); align-self: flex-end; border-bottom-right-radius: 4px; }
+.chat-meta { font-size: 0.7rem; color: var(--muted); margin-bottom: 0.25rem; display: block; }
+
+/* Grafik */
+.chart-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  background: rgba(30,41,59,.6);
+  border: 1px solid rgba(148,163,184,.15);
+  border-radius: 20px;
+  padding: 2rem;
+  backdrop-filter: blur(20px);
+}
+.chart-box {
+  background: rgba(15,23,42,.4);
+  border-radius: 16px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.chart-box h3 {
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+  color: var(--text);
+  text-align: center;
+}
+.chart-wrapper {
+  width: 100%;
+  max-width: 300px;
+  height: 250px;
+  position: relative;
+}
+/* Aduan Terbaru */
+.recent-container {
+  max-width: 900px;
+  margin: 0 auto;
+  background: rgba(30,41,59,.6);
+  border: 1px solid rgba(148,163,184,.15);
+  border-radius: 20px;
+  padding: 1.5rem;
+  backdrop-filter: blur(20px);
+}
+.recent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.recent-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(15,23,42,.6);
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  border-left: 4px solid var(--accent);
+  transition: .3s;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.recent-item:hover {
+  transform: translateX(5px);
+  background: rgba(15,23,42,.9);
+}
+.recent-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.recent-kategori {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text);
+}
+.recent-tanggal {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.recent-status {
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+/* ================= STYLE UNTUK CETAK (PRINT) ================= */
+@media print {
+  /* Sembunyikan semua elemen web */
+  body * {
+    visibility: hidden;
+  }
+  
+  /* Tampilkan HANYA area yang akan dicetak */
+  #printableArea, #printableArea * {
+    visibility: visible;
+  }
+  
+  /* Posisikan area cetak di pojok kiri atas */
+  #printableArea {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    background: #fff !important;
+    color: #000 !important;
+    padding: 20px;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Ubah teks dan border menjadi hitam */
+  #printableArea .track-row {
+    border-bottom: 1px solid #ccc !important;
+    color: #000 !important;
+  }
+  #printableArea .track-row span:first-child {
+    color: #555 !important;
+  }
+  #printableArea .track-row span:last-child,
+  #printableArea a {
+    color: #000 !important;
+    font-weight: bold;
+  }
+  
+  /* Tampilkan Kop Surat */
+  #printableArea .print-header {
+    display: block !important;
+  }
+  
+  /* Sembunyikan elemen yang tidak perlu dicetak */
+  .no-print, nav, footer, .chat-toggle, .chat-window, .track-form, .section-title {
+    display: none !important;
+  }
+  
+  /* Sesuaikan tampilan peta atau foto agar tidak merusak halaman */
+  #printableArea img, #printableArea #miniMap {
+    max-width: 100% !important;
+    page-break-inside: avoid;
+  }
+  
+  /* Warna background badge disesuaikan */
+  #printableArea .badge-status {
+    border: 1px solid #000;
+    color: #000 !important;
+    background: transparent !important;
+  }
+}
+
+</style>
+</head>
+<body>
+
+<!-- Animated Background -->
+<div class="bg-anim">
+  <div class="blob blob1"></div>
+  <div class="blob blob2"></div>
+  <div class="blob blob3"></div>
+</div>
+
+<!-- Navbar -->
+<nav>
+  <div class="logo">
+    <div class="logo-icon">🏛️</div>
+    <span>Aduan Sirampog</span>
+  </div>
+  <ul>
+    <li><a href="#home">Beranda</a></li>
+    <li><a href="#layanan">Layanan</a></li>
+    <li><a href="#lacak">Lacak Aduan</a></li>
+	<li><a href="#statistik">Statistik</a></li>
+    <li><a href="#" onclick="openForm(event)">Buat Aduan</a></li>
+  </ul>
+</nav>
+
+<!-- Hero -->
+<section class="hero" id="home">
+  <div class="hero-badge">✨ Layanan Digital Kecamatan Sirampog</div>
+  <h1>Sampaikan Aduan Anda<br>dengan Mudah & Cepat</h1>
+  <p>Platform pengaduan masyarakat Kecamatan Sirampog yang dilengkapi chatbot AI untuk membantu Anda 24/7.</p>
+  <div class="hero-btns">
+    <button class="btn btn-primary" onclick="openChat()">💬 Mulai Chat dengan Bot</button>
+    <button class="btn btn-outline" onclick="openForm()">📝 Buat Aduan</button>
+  </div>
+</section>
+
+<!-- Stats -->
+<div class="stats">
+  <div class="stat"><div class="stat-num" id="statTotal">0</div><div class="stat-label">Aduan Masuk</div></div>
+  <div class="stat"><div class="stat-num" id="statRating">0%</div><div class="stat-label">Tingkat Kepuasan</div></div>
+  <div class="stat"><div class="stat-num">24/7</div><div class="stat-label">Layanan Chatbot</div></div>
+  <div class="stat"><div class="stat-num" id="statSelesai">0</div><div class="stat-label">Aduan Selesai</div></div>
+</div>
+
+<!-- Layanan -->
+<section class="section" id="layanan">
+  <div class="section-title">
+    <h2>Layanan Kami</h2>
+    <p>Berbagai layanan pengaduan untuk masyarakat Sirampog</p>
+  </div>
+  <div class="cards">
+    <div class="card"><div class="card-icon">🏗️</div><h3>Infrastruktur</h3><p>Laporkan kerusakan jalan, jembatan, drainase, dan fasilitas umum lainnya.</p></div>
+    <div class="card"><div class="card-icon">📋</div><h3>Administrasi</h3><p>Aduan terkait pelayanan administrasi kependudukan dan surat-menyurat.</p></div>
+    <div class="card"><div class="card-icon">🌿</div><h3>Lingkungan</h3><p>Laporkan masalah sampah, pencemaran, dan kebersihan lingkungan.</p></div>
+    <div class="card"><div class="card-icon">🤝</div><h3>Pelayanan Publik</h3><p>Aduan terkait kualitas pelayanan aparatur kecamatan dan desa.</p></div>
+    <div class="card"><div class="card-icon">🚨</div><h3>Darurat</h3><p>Pelaporan kejadian darurat seperti bencana alam dan kecelakaan.</p></div>
+    <div class="card"><div class="card-icon">💡</div><h3>Saran & Masukan</h3><p>Berikan ide dan masukan untuk kemajuan Kecamatan Sirampog.</p></div>
+  </div>
+</section>
+
+<!-- Lacak Aduan -->
+<section class="section" id="lacak">
+  <div class="section-title">
+    <h2>Lacak Aduan Anda</h2>
+    <p>Masukkan nomor tiket untuk melihat status terkini</p>
+  </div>
+  <div class="track-container">
+    <form class="track-form" onsubmit="lacakTiket(event)">
+      <input type="text" id="inputTiket" required placeholder="Contoh: SRP-123456" autocomplete="off">
+      <button type="submit" class="btn btn-primary" id="btnLacak" style="width:auto">🔍 Lacak</button>
+    </form>
+    <div class="track-result" id="trackResult"></div>
+  </div>
+</section>
+
+<!-- Statistik & Grafik -->
+<section class="section" id="statistik">
+  <div class="section-title">
+    <h2>Statistik Aduan</h2>
+    <p>Transparansi data aduan masyarakat Kecamatan Sirampog</p>
+  </div>
+  <div class="chart-container">
+    <div class="chart-box">
+      <h3>Distribusi Kategori Aduan</h3>
+      <div class="chart-wrapper">
+        <canvas id="chartKategori"></canvas>
+      </div>
+    </div>
+    <div class="chart-box">
+      <h3>Tingkat Kepuasan Masyarakat</h3>
+      <div class="chart-wrapper">
+        <canvas id="chartRating"></canvas>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Aduan Terbaru -->
+<section class="section" id="aduan-terbaru">
+  <div class="section-title">
+    <h2>Aduan Terbaru</h2>
+    <p>Pantau aktivitas pengaduan masyarakat secara transparan</p>
+  </div>
+  <div class="recent-container">
+    <div id="recentList" class="recent-list">
+      <!-- Data akan dimuat oleh JavaScript -->
+      <div style="text-align:center; color:var(--muted); padding: 2rem;">Memuat data aduan terbaru...</div>
+    </div>
+  </div>
+</section>
+
+<!-- Tentang -->
+<section class="section" id="tentang">
+  <div class="section-title">
+    <h2>Tentang Aduan Sirampog</h2>
+    <p>Komitmen kami untuk pelayanan yang lebih baik</p>
+  </div>
+  <div class="cards">
+    <div class="card"><div class="card-icon">⚡</div><h3>Cepat</h3><p>Aduan Anda langsung diteruskan ke petugas yang berwenang tanpa birokrasi berbelit.</p></div>
+    <div class="card"><div class="card-icon">🔒</div><h3>Aman</h3><p>Data pribadi Anda dilindungi dan hanya digunakan untuk keperluan penanganan aduan.</p></div>
+    <div class="card"><div class="card-icon">📊</div><h3>Transparan</h3><p>Pantau status aduan Anda secara real-time melalui dashboard pengaduan.</p></div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  © 2025 Kecamatan Sirampog, Kabupaten Brebes. All rights reserved.<br>
+  <span style="opacity:.6;font-size:.75rem;display:block;margin-top:.5rem">Dibuat dengan ❤️ untuk masyarakat Sirampog</span>
+  <a href="admin.html" style="display:inline-block;margin-top:1rem;font-size:.75rem;opacity:.5">Login Administrator</a>
+</footer>
+
+<!-- Chat Toggle -->
+<button class="chat-toggle" id="chatToggle" onclick="toggleChat()">💬</button>
+
+<!-- Chat Window -->
+<div class="chat-window" id="chatWindow">
+  <div class="chat-header">
+    <div class="chat-avatar">🤖</div>
+    <div class="chat-header-info">
+      <h4>Asisten Sirampog</h4>
+      <span><span class="online-dot"></span>Online 24/7</span>
+    </div>
+    <button class="chat-close" onclick="toggleChat()">✕</button>
+  </div>
+  <div class="chat-body" id="chatBody">
+    <div class="msg bot">Halo! 👋 Selamat datang di layanan aduan Kecamatan Sirampog. Saya Asisten Sirampog, siap membantu Anda. Ada yang bisa saya bantu?</div>
+  </div>
+  <div class="chat-quick" id="quickReplies">
+    <button class="quick-btn" onclick="quickReply('Cara buat aduan')">Cara buat aduan</button>
+    <button class="quick-btn" onclick="quickReply('Jam pelayanan')">Jam pelayanan</button>
+    <button class="quick-btn" onclick="quickReply('Lacak aduan')">Lacak aduan</button>
+    <button class="quick-btn" onclick="quickReply('Kontak')">Kontak</button>
+  </div>
+  <div class="chat-input">
+    <input type="text" id="chatInput" placeholder="Ketik pesan..." onkeypress="if(event.key==='Enter')sendMessage()">
+    <button onclick="sendMessage()">➤</button>
+  </div>
+</div>
+
+<!-- Form Modal Aduan -->
+<div class="modal" id="formModal">
+  <div class="modal-content">
+    <h3>📝 Buat Aduan Baru</h3>
+    <form onsubmit="submitAduan(event)" id="formAduan">
+      <div class="form-group">
+        <label>Nama Lengkap *</label>
+        <input type="text" id="aduanNama" required placeholder="Masukkan nama Anda">
+      </div>
+      <div class="form-group">
+        <label>Nomor Telepon *</label>
+        <input type="tel" id="aduanTelp" required placeholder="08xxxxxxxxxx">
+      </div>
+      <div class="form-group">
+        <label>Kategori Aduan *</label>
+        <select id="aduanKategori" required>
+          <option value="">Pilih kategori</option>
+          <option>Infrastruktur</option>
+          <option>Administrasi</option>
+          <option>Lingkungan</option>
+          <option>Pelayanan Publik</option>
+          <option>Darurat</option>
+          <option>Saran & Masukan</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Lokasi/Desa *</label>
+        <input type="text" id="aduanLokasi" required placeholder="Contoh: Desa Sirampog">
+      </div>
+      
+      <!-- TAMBAHKAN KODE PETA INI -->
+      <div class="form-group">
+        <label>📍 Tandai Lokasi di Peta</label>
+        <div id="map"></div>
+        <input type="hidden" id="aduanLat" value="">
+        <input type="hidden" id="aduanLng" value="">
+        <small style="color:var(--muted);font-size:.75rem;margin-top:.5rem;display:block">
+          Geser peta dan klik pada titik lokasi aduan Anda. (Opsional)
+        </small>
+      </div>
+      <!-- SAMPAI SINI -->
+      <div class="form-group">
+        <label>Isi Aduan *</label>
+        <textarea id="aduanIsi" required placeholder="Jelaskan aduan Anda secara detail..."></textarea>
+      </div>
+	  <div class="form-group">
+        <label>Upload Foto (Opsional)</label>
+        <input type="file" id="aduanFoto" accept="image/*" style="padding: .5rem; background: rgba(15,23,42,.6);">
+        <small style="color:var(--muted);font-size:.75rem;margin-top:.25rem;display:block">Maksimal 2MB. Format: JPG, PNG.</small>
+      </div>
+      <div style="display:flex;gap:.75rem;margin-top:1.5rem">
+        <button type="button" class="btn btn-outline" style="flex:1" onclick="closeForm()">Batal</button>
+        <button type="submit" class="btn btn-primary" style="flex:1" id="btnKirimAduan">Kirim Aduan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">✅ Berhasil!</div>
+
+<script>
+// GANTI DENGAN URL WEB APP ANDA
+const API_URL = 'https://script.google.com/macros/s/AKfycbxirvmiS8VchvTQh5G8Y5WkUZX5jbVKLIbh26OjhaMqXBRlFCLNa9ITOoIWiIYKydcfQw/exec';
+
+// ==========================================
+// 1. LOGIKA LACAK TIKET (PERBAIKAN)
+// ==========================================
+async function lacakTiket(e) {
+  e.preventDefault();
+  const input = document.getElementById('inputTiket').value.trim();
+  const btn = document.getElementById('btnLacak');
+  const resultDiv = document.getElementById('trackResult');
+  
+  if(!input) return;
+  
+  btn.disabled = true;
+  btn.textContent = 'Mencari...';
+  resultDiv.style.display = 'block';
+  resultDiv.innerHTML = '<div style="text-align:center;color:var(--muted)">Mencari data aduan...</div>';
+
+  try {
+    const url = new URL(API_URL);
+    url.searchParams.set('action', 'trackAduan');
+    url.searchParams.set('ticketId', input);
+    
+    const res = await fetch(url.toString(), { redirect: 'follow' });
+    const result = await res.json();
+    
+    if (result.error) {
+      resultDiv.innerHTML = `<div class="track-error">❌ ${result.error}</div>`;
+      return;
+    }
+
+    if (result.success) {
+      const d = result.data;
+      let badgeClass = 'bg-baru';
+      if (d.Status === 'Diproses') badgeClass = 'bg-proses';
+      if (d.Status === 'Selesai') badgeClass = 'bg-selesai';
+
+      let tgl = '-';
+      if (d.Tanggal) {
+        try {
+          tgl = new Date(d.Tanggal).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'});
+        } catch(err) { tgl = d.Tanggal; }
+      }
+
+      // Siapkan tampilan foto (jika ada)
+      const fotoHtml = (d.Foto && d.Foto !== '-') 
+        ? `<div class="track-row"><span>Foto Aduan</span><span><a href="${d.Foto}" target="_blank" style="color:var(--accent);text-decoration:underline">Lihat Foto</a></span></div>` 
+        : '';
+
+      // Siapkan tampilan mini-map (jika ada koordinat)
+      const petaHtml = (d.Lat && d.Lng) 
+        ? `<div style="margin-top: 1rem; border-top: 1px dashed rgba(148,163,184,.2); padding-top: 1rem;">
+             <span style="color:var(--muted); font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Lokasi di Peta:</span>
+             <div id="miniMap" style="height: 180px; border-radius: 8px; z-index: 1;"></div>
+           </div>` 
+        : '';
+		
+	  let ratingHtml = '';
+      if (d.Status === 'Selesai') {
+        if (d.Rating) {
+          // Jika sudah pernah rating
+          ratingHtml = `<div class="track-row"><span>Rating Anda</span><span style="color:#fbbf24; font-size:1.2rem">${'⭐'.repeat(d.Rating)}</span></div>`;
+        } else {
+          // Jika belum rating, tampilkan tombol bintang
+          ratingHtml = `
+            <div class="track-row" style="display:block; border-bottom:none; padding-top:1rem;">
+              <span style="display:block; margin-bottom:.5rem;">Beri Rating Kepuasan:</span>
+              <div id="ratingStars" style="font-size: 1.5rem; cursor: pointer; color: var(--muted);">
+                <span onclick="kirimRating('${d.TicketID}', 1)">⭐</span>
+                <span onclick="kirimRating('${d.TicketID}', 2)">⭐</span>
+                <span onclick="kirimRating('${d.TicketID}', 3)">⭐</span>
+                <span onclick="kirimRating('${d.TicketID}', 4)">⭐</span>
+                <span onclick="kirimRating('${d.TicketID}', 5)">⭐</span>
+              </div>
+            </div>
+          `;
+        }
+      }
+	  
+	  let catatanHtml = '';
+      if (d.Catatan && d.Catatan !== '') {
+        catatanHtml = `
+          <div style="background: rgba(59,130,246,.1); border-left: 3px solid var(--primary-light); padding: 1rem; border-radius: 8px; margin: 1rem 0;">
+            <span style="display:block; font-size:0.8rem; color:var(--muted); margin-bottom:0.25rem;">Catatan Petugas:</span>
+            <span style="font-size:0.95rem; line-height:1.4;">${d.Catatan}</span>
+          </div>
+        `;
+      }
+	  
+
+      // Render HTML ke layar
+      resultDiv.innerHTML = `
+        <div class="track-card" id="printableArea">
+          <!-- KOP SURAT UNTUK CETAKAN -->
+          <div class="print-header" style="display:none; text-align:center; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px;">
+            <h2 style="margin:0; font-size: 18px; color:#000;">PEMERINTAH KABUPATEN BREBES</h2>
+            <h3 style="margin:0; font-size: 16px; color:#000;">KECAMATAN SIRAMPOG</h3>
+            <p style="margin:0; font-size: 12px; color:#000;">Jl. Raya Sirampog, Kec. Sirampog, Kab. Brebes</p>
+          </div>
+
+          <div class="track-row"><span>Nomor Tiket</span><span style="color:var(--accent)">${d.TicketID || '-'}</span></div>
+          <div class="track-row"><span>Tanggal Lapor</span><span>${tgl}</span></div>
+          <div class="track-row"><span>Kategori</span><span>${d.Kategori || '-'}</span></div>
+          <div class="track-row"><span>Lokasi</span><span>${d.Lokasi || '-'}</span></div>
+          <div class="track-row">
+            <span>Status Terkini</span>
+            <span><span class="badge-status ${badgeClass}">${d.Status || '-'}</span></span>
+          </div>
+		  ${catatanHtml}
+          ${fotoHtml}
+		  ${ratingHtml} 
+          ${petaHtml}
+          
+		  <div id="chatArea" class="no-print" style="margin-top: 1.5rem; border-top: 1px dashed rgba(148,163,184,.3); padding-top: 1rem;">
+             <div id="chatMessages" style="max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1rem;"></div>
+             <div style="display: flex; gap: 0.5rem;">
+                <input type="text" id="chatInputPublic" placeholder="Tulis balasan/tanggapan..." style="flex:1; padding:0.75rem; border-radius:8px; border:1px solid rgba(148,163,184,.3); background:rgba(15,23,42,.6); color:#fff;">
+                <button onclick="kirimPesanPublik('${d.TicketID}')" class="btn btn-primary" style="padding:0.75rem 1rem;">Kirim</button>
+             </div>
+          </div>
+		  
+          <!-- TOMBOL CETAK (Disembunyikan saat diprint) -->
+          <div class="no-print" style="margin-top: 1.5rem; text-align: center;">
+            <button onclick="cetakBukti()" class="btn btn-outline" style="width:100%">🖨️ Cetak Bukti Aduan</button>
+          </div>
+        </div>
+      `;
+
+      // Jika ada koordinat, inisialisasi Leaflet Map di dalam div #miniMap
+      if (d.Lat && d.Lng) {
+        setTimeout(() => {
+          const miniMap = L.map('miniMap').setView([d.Lat, d.Lng], 15);
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+          }).addTo(miniMap);
+          L.marker([d.Lat, d.Lng]).addTo(miniMap);
+        }, 100); // Delay dikit agar div-nya siap
+      }
+
+    } else {
+      resultDiv.innerHTML = `<div class="track-error">❌ ${result.message || 'Tiket tidak ditemukan.'}</div>`;
+    }
+  } catch(err) {
+    console.error('Error Lacak:', err);
+    resultDiv.innerHTML = `<div class="track-error">❌ Gagal terhubung ke server. Pastikan URL API benar dan koneksi internet stabil.</div>`;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🔍 Lacak';
+  }
+}
+
+// ==========================================
+// 2. LOGIKA FORM ADUAN
+// ==========================================
+async function submitAduan(e){
+  e.preventDefault();
+  const btn = document.getElementById('btnKirimAduan');
+  const fileInput = document.getElementById('aduanFoto');
+  
+  btn.disabled = true;
+  btn.textContent = 'Mengirim...';
+  
+  // Fungsi bantuan untuk baca file jadi Base64
+  const toBase64 = file => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
+  });
+
+  let base64Image = '';
+  
+  try {
+    // Cek jika ada file yang diupload
+    if (fileInput.files.length > 0) {
+      const file = fileInput.files[0];
+      if (file.size > 2 * 1024 * 1024) {
+        throw new Error('Ukuran foto maksimal 2MB!');
+      }
+      base64Image = await toBase64(file);
+    }
+
+    const data = {
+      username: document.getElementById('aduanNama').value,
+      kategori: document.getElementById('aduanKategori').value,
+      lokasi: document.getElementById('aduanLokasi').value,
+      isi: document.getElementById('aduanIsi').value + ' (Telp: ' + document.getElementById('aduanTelp').value + ')',
+      foto: base64Image,
+	  lat: document.getElementById('aduanLat').value, 
+      lng: document.getElementById('aduanLng').value  
+    };
+    
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'submitAduan', data }),
+      redirect: 'follow'
+    });
+    const result = await res.json();
+    
+    if (result.success) {
+      closeForm();
+      showToast('✅ Aduan berhasil dikirim! Nomor tiket: ' + result.ticketId + '. Mohon simpan nomor ini.');
+      document.getElementById('formAduan').reset();
+    } else {
+      showToast('Gagal: ' + (result.message || result.error || 'Terjadi kesalahan'), true);
+    }
+  } catch(err) {
+    showToast('Error: ' + err.message, true);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Kirim Aduan';
+  }
+}
+
+// ==========================================
+// 3. LOGIKA CHATBOT
+// ==========================================
+const chatWindow = document.getElementById('chatWindow');
+const chatToggle = document.getElementById('chatToggle');
+const chatBody = document.getElementById('chatBody');
+const chatInput = document.getElementById('chatInput');
+const quickReplies = document.getElementById('quickReplies');
+
+function toggleChat(){
+  chatWindow.classList.toggle('open');
+  chatToggle.style.display = chatWindow.classList.contains('open') ? 'none' : 'grid';
+  if(chatWindow.classList.contains('open')) setTimeout(()=>chatInput.focus(),300);
+}
+
+function openChat(){ 
+  if(!chatWindow.classList.contains('open')) toggleChat(); 
+}
+
+function addMessage(text, sender){
+  const div = document.createElement('div');
+  div.className = 'msg ' + sender;
+  div.innerHTML = text;
+  chatBody.appendChild(div);
+  chatBody.scrollTop = chatBody.scrollHeight;
+}
+
+function showTyping(){
+  const div = document.createElement('div');
+  div.className = 'msg bot typing';
+  div.id = 'typingIndicator';
+  div.innerHTML = '<span></span><span></span><span></span>';
+  chatBody.appendChild(div);
+  chatBody.scrollTop = chatBody.scrollHeight;
+}
+
+function hideTyping(){
+  const t = document.getElementById('typingIndicator');
+  if(t) t.remove();
+}
+
+function getBotResponse(msg){
+  const m = msg.toLowerCase();
+  if(m.includes('halo')||m.includes('hai')||m.includes('hello')) return 'Halo! 👋 Ada yang bisa saya bantu terkait layanan Kecamatan Sirampog?';
+  if(m.includes('cara') && m.includes('aduan')) return 'Untuk membuat aduan, Anda bisa:<br>1️⃣ Klik tombol "Buat Aduan" di halaman utama<br>2️⃣ Isi formulir dengan lengkap<br>3️⃣ Klik "Kirim Aduan"<br>4️⃣ Simpan nomor tiket untuk pelacakan ✅';
+  if(m.includes('jam')||m.includes('pelayanan')||m.includes('buka')) return '🕐 <b>Jam Pelayanan Kecamatan Sirampog:</b><br>• Senin - Kamis: 08.00 - 15.30 WIB<br>• Jumat: 08.00 - 11.00 WIB<br>• Sabtu - Minggu: Tutup<br><br>Namun chatbot ini aktif 24/7! 🤖';
+  if(m.includes('lacak')||m.includes('status')||m.includes('tiket')) return '🔍 Untuk melacak aduan, silakan <a href="#lacak" style="color:var(--accent)">klik di sini</a> atau scroll ke bagian "Lacak Aduan", lalu masukkan nomor tiket Anda (format: SRP-XXXXXX).';
+  if(m.includes('kontak')||m.includes('telepon')||m.includes('alamat')) return '📞 <b>Kontak Kecamatan Sirampog:</b><br>• Alamat: Jl. Raya Sirampog, Kec. Sirampog, Kab. Brebes<br>• Telp: (0283) XXXXXXX<br>• Email: kec.sirampog@brebeskab.go.id<br>• Instagram: @kec.sirampog';
+  if(m.includes('infrastruktur')||m.includes('jalan')||m.includes('rusak')) return '🏗️ Untuk aduan infrastruktur (jalan rusak, jembatan, drainase), silakan buat aduan dengan kategori "Infrastruktur" dan sertakan:<br>• Lokasi detail<br>• Foto kondisi (jika ada)<br>• Tingkat kerusakan<br><br>Aduan akan diteruskan ke Dinas PU terkait.';
+  if(m.includes('sampah')||m.includes('lingkungan')) return '🌿 Aduan lingkungan (sampah, pencemaran) dapat disampaikan dengan kategori "Lingkungan". Tim DLH akan menindaklanjuti dalam 1x24 jam.';
+  if(m.includes('darurat')||m.includes('bencana')) return '🚨 <b>Untuk kondisi darurat, segera hubungi:</b><br>• Call Center Darurat: 112<br>• BPBD Brebes: (0283) XXXXXXX<br>• Kantor Kecamatan: (0283) XXXXXXX<br><br>Anda juga bisa buat aduan darurat melalui form.';
+  if(m.includes('terima')||m.includes('makasih')||m.includes('thanks')) return 'Sama-sama! 😊 Senang bisa membantu. Jika ada pertanyaan lain, jangan ragu hubungi saya lagi ya!';
+  if(m.includes('siapa')||m.includes('bot')) return 'Saya Asisten Sirampog 🤖, chatbot AI yang siap membantu Anda 24/7 terkait layanan pengaduan Kecamatan Sirampog.';
+  return 'Terima kasih atas pesan Anda. 🙏 Untuk aduan spesifik, saya sarankan:<br>• Klik "Buat Aduan" untuk lapor resmi<br>• Atau tanyakan: "jam pelayanan", "cara buat aduan", "kontak", "lacak aduan"<br><br>Ada hal lain yang bisa saya bantu?';
+}
+
+async function sendMessage(){
+  const text = chatInput.value.trim();
+  if(!text) return;
+  
+  addMessage(text, 'user');
+  chatInput.value = '';
+  quickReplies.style.display = 'none';
+  showTyping();
+  
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'chatAI', message: text }),
+      redirect: 'follow'
+    });
+    
+    const result = await res.json();
+    hideTyping();
+    
+    if (result.success) {
+      let formattedReply = result.reply.replace(/\n/g, '<br>');
+      addMessage(formattedReply, 'bot');
+    } else {
+      addMessage('Maaf, saya sedang tidak bisa menjawab saat ini.', 'bot');
+    }
+  } catch(err) {
+    hideTyping();
+    addMessage('Maaf, koneksi terputus.', 'bot');
+  }
+}
+
+function quickReply(text){
+  chatInput.value = text;
+  sendMessage();
+}
+
+// ==========================================
+// 4. UTILITAS UMUM
+// ==========================================
+function showToast(msg, isError = false){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (isError ? ' error' : '');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 9000);
+}
+
+window.addEventListener('click', e => { if(e.target.id === 'formModal') closeForm(); });
+
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click', e=>{
+    const target = document.querySelector(a.getAttribute('href'));
+    if(target){ e.preventDefault(); target.scrollIntoView({behavior:'smooth'}); }
+  });
+});
+
+const observer = new IntersectionObserver(entries=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting) entry.target.style.animation = 'fadeUp .8s ease forwards';
+  });
+}, {threshold:.1});
+
+document.querySelectorAll('.card, .stat').forEach(el=>{
+  el.style.opacity = '0';
+  observer.observe(el);
+});
+
+// ==========================================
+// 5. LOGIKA PETA (LEAFLET)
+// ==========================================
+// ==========================================
+// 5. LOGIKA PETA (LEAFLET)
+// ==========================================
+let map, marker;
+
+function initMap() {
+  const defaultLat = -7.204032722;
+  const defaultLng = 109.0626013;
+
+  // Jika peta sudah pernah dibuat, jangan buat ulang 	
+  if (map) return;
+
+  map = L.map('map', {
+    zoomControl: true,
+    scrollWheelZoom: false // Mencegah halaman ikut ter-scroll saat zoom peta
+  }).setView([defaultLat, defaultLng], 13);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap'
+  }).addTo(map);
+
+  map.on('click', function(e) {
+    const lat = e.latlng.lat;
+    const lng = e.latlng.lng;
+
+    if (marker) {
+      marker.setLatLng(e.latlng);
+    } else {
+      marker = L.marker(e.latlng).addTo(map);
+    }
+
+    document.getElementById('aduanLat').value = lat;
+    document.getElementById('aduanLng').value = lng;
+  });
+}
+
+// Ubah fungsi openForm agar peta otomatis menyesuaikan ukuran
+function openForm(e){
+  if(e) e.preventDefault();
+  document.getElementById('formModal').classList.add('open');
+  
+  // Delay sedikit agar animasi modal selesai, lalu perbaiki ukuran peta
+  setTimeout(() => {
+    if (map) {
+      map.invalidateSize();
+    }
+  }, 400); // 400ms sesuai durasi animasi CSS modalIn
+}
+
+function closeForm(){
+  document.getElementById('formModal').classList.remove('open');
+  
+  // Reset marker dan koordinat saat form ditutup (Opsional)
+  /*
+  if (marker) {
+    map.removeLayer(marker);
+    marker = null;
+  }
+  document.getElementById('aduanLat').value = '';
+  document.getElementById('aduanLng').value = '';
+  */
+}
+
+let chartKategoriInstance = null;
+let chartRatingInstance = null;
+
+async function loadStats() {
+  try {
+    const res = await fetch(API_URL + '?action=getStats');
+    const data = await res.json();
+    
+    if (!data.error) {
+      // Update angka statistik atas
+      document.getElementById('statTotal').textContent = data.total;
+      document.getElementById('statSelesai').textContent = data.selesai;
+      
+      if (data.countRating > 0) {
+        document.getElementById('statRating').textContent = data.rating + '%';
+      } else {
+        document.getElementById('statRating').textContent = '-';
+      }
+
+      // Render Grafik
+      renderCharts(data.kategori, data.ratings);
+    }
+  } catch(e) { console.error("Gagal load stats", e); }
+}
+
+function renderCharts(kategoriData, ratingData) {
+  const isDarkMode = true; // Sesuaikan dengan tema Anda
+  const textColor = '#94a3b8';
+  const gridColor = 'rgba(148,163,184,0.1)';
+
+  // 1. Grafik Kategori (Doughnut)
+  const ctxKategori = document.getElementById('chartKategori').getContext('2d');
+  if (chartKategoriInstance) chartKategoriInstance.destroy(); // Hapus chart lama jika ada
+  
+  chartKategoriInstance = new Chart(ctxKategori, {
+    type: 'doughnut',
+    data: {
+      labels: Object.keys(kategoriData),
+      datasets: [{
+        data: Object.values(kategoriData),
+        backgroundColor: [
+          '#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'
+        ],
+        borderWidth: 0,
+        hoverOffset: 10
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { color: textColor, padding: 15, font: { size: 11 } }
+        }
+      }
+    }
+  });
+
+  // 2. Grafik Rating (Bar)
+  const ctxRating = document.getElementById('chartRating').getContext('2d');
+  if (chartRatingInstance) chartRatingInstance.destroy();
+  
+  chartRatingInstance = new Chart(ctxRating, {
+    type: 'bar',
+    data: {
+      labels: ['⭐ 1', '⭐ 2', '⭐ 3', '⭐ 4', '⭐ 5'],
+      datasets: [{
+        label: 'Jumlah Ulasan',
+        data: [
+          ratingData['1'] || 0, 
+          ratingData['2'] || 0, 
+          ratingData['3'] || 0, 
+          ratingData['4'] || 0, 
+          ratingData['5'] || 0
+        ],
+        backgroundColor: 'rgba(6, 182, 212, 0.8)',
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { color: textColor, stepSize: 1 },
+          grid: { color: gridColor }
+        },
+        x: {
+          ticks: { color: textColor },
+          grid: { display: false }
+        }
+      }
+    }
+  });
+}
+
+async function loadRecentAduan() {
+  const container = document.getElementById('recentList');
+  
+  try {
+    const res = await fetch(API_URL + '?action=getAllAduan');
+    const data = await res.json();
+    
+    if (data.error || !data || data.length === 0) {
+      container.innerHTML = '<div style="text-align:center; color:var(--muted); padding: 1rem;">Belum ada aduan yang masuk.</div>';
+      return;
+    }
+    
+    // Ambil 5 data terbaru (karena urutan asli dari sheet adalah lama -> baru, kita reverse dulu)
+    const latest = [...data].reverse().slice(0, 5);
+    
+    container.innerHTML = latest.map(row => {
+      let badgeClass = 'bg-baru';
+      if (row.Status === 'Diproses') badgeClass = 'bg-proses';
+      if (row.Status === 'Selesai') badgeClass = 'bg-selesai';
+      
+      let tgl = '-';
+      if (row.Tanggal) {
+        tgl = new Date(row.Tanggal).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'});
+      }
+      
+      return `
+        <div class="recent-item">
+          <div class="recent-info">
+            <span class="recent-kategori">${row.Kategori}</span>
+            <span class="recent-tanggal">📍 ${row.Lokasi} • ${tgl}</span>
+          </div>
+          <span class="recent-status badge-status ${badgeClass}">${row.Status}</span>
+        </div>
+      `;
+    }).join('');
+    
+  } catch (err) {
+    container.innerHTML = '<div style="text-align:center; color:var(--danger); padding: 1rem;">Gagal memuat data terbaru.</div>';
+  }
+}
+
+async function kirimRating(ticketId, ratingValue) {
+  document.getElementById('ratingStars').innerHTML = '<span style="font-size:1rem; color:var(--muted)">Menyimpan rating...</span>';
+  
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'submitRating', ticketId: ticketId, ratingValue: ratingValue }),
+      redirect: 'follow'
+    });
+    const result = await res.json();
+    
+    if (result.success) {
+      showToast('✅ Terima kasih atas rating Anda!');
+      lacakTiket(new Event('submit')); 
+      loadStats(); 
+    } else {
+      showToast('Gagal: ' + result.message, true);
+      lacakTiket(new Event('submit')); 
+    }
+  } catch(err) {
+    showToast('Error koneksi', true);
+    lacakTiket(new Event('submit'));
+  }
+}
+
+function cetakBukti() {
+  setTimeout(() => {
+    window.print();
+  }, 100);
+}
+
+// ==========================================
+// 6. FITUR CHAT PUBLIK
+// ==========================================
+async function loadChatPublik(ticketId) {
+  const chatBox = document.getElementById('chatMessages');
+  if(!chatBox) return;
+  
+  try {
+    const res = await fetch(API_URL + '?action=getPesan&ticketId=' + ticketId);
+    const result = await res.json();
+    
+    if (result.success && result.data.length > 0) {
+      chatBox.innerHTML = result.data.map(msg => {
+        const isAdmin = msg.Pengirim === 'Admin';
+        const bubbleClass = isAdmin ? 'chat-admin' : 'chat-warga';
+        const name = isAdmin ? 'Petugas Kecamatan' : msg.Pengirim;
+        const tgl = new Date(msg.Tanggal).toLocaleString('id-ID', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
+        
+        return `
+          <div class="chat-bubble ${bubbleClass}">
+            <span class="chat-meta">${name} • ${tgl}</span>
+            ${msg.Pesan}
+          </div>
+        `;
+      }).join('');
+      
+      // Auto scroll ke bawah
+      chatBox.scrollTop = chatBox.scrollHeight;
+    } else {
+      chatBox.innerHTML = '<div style="text-align:center; font-size:0.8rem; color:var(--muted);">Belum ada balasan. Silakan kirim pesan.</div>';
+    }
+  } catch(e) { console.error(e); }
+}
+
+async function kirimPesanPublik(ticketId) {
+  const input = document.getElementById('chatInputPublic');
+  const pesan = input.value.trim();
+  if(!pesan) return;
+  
+  input.disabled = true;
+  
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ 
+        action: 'kirimPesan', 
+        ticketId: ticketId, 
+        pengirim: 'Warga', 
+        pesan: pesan 
+      }),
+      redirect: 'follow'
+    });
+    const result = await res.json();
+    
+    if (result.success) {
+      input.value = '';
+      loadChatPublik(ticketId); // Refresh chat
+    } else {
+      showToast('Gagal mengirim pesan', true);
+    }
+  } catch(e) {
+    showToast('Error koneksi', true);
+  } finally {
+    input.disabled = false;
+    input.focus();
+  }
+}
+
+// Panggil saat halaman siap
+window.addEventListener('DOMContentLoaded', () => {
+  loadStats();
+  loadRecentAduan();
+  initMap(); 
+});
+
+</script>
+
+</body>
+</html>
