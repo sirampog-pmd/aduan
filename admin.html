@@ -5,11 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard Admin - Aduan Sirampog</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<!-- Library Leaflet untuk Peta -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<!-- Library MarkerCluster agar pin tidak menumpuk -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
 <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
@@ -20,14 +17,12 @@
 body{background:var(--bg);color:var(--text);min-height:100vh}
 .hidden{display:none!important}
 
-/* Animated Background */
 .bg-anim{position:fixed;inset:0;z-index:-1;overflow:hidden}
 .blob{position:absolute;border-radius:50%;filter:blur(80px);opacity:.35;animation:float 20s infinite}
 .blob1{width:500px;height:500px;background:#3b82f6;top:-150px;left:-100px}
 .blob2{width:400px;height:400px;background:#06b6d4;bottom:-100px;right:-100px;animation-delay:-5s}
 @keyframes float{0%,100%{transform:translate(0,0)}33%{transform:translate(80px,-60px)}66%{transform:translate(-60px,60px)}}
 
-/* Login Page */
 #loginSection{display:flex;justify-content:center;align-items:center;min-height:100vh;padding:1rem}
 .login-box{background:rgba(30,41,59,.8);backdrop-filter:blur(20px);border:1px solid rgba(148,163,184,.2);border-radius:24px;padding:3rem 2.5rem;width:100%;max-width:420px;animation:fadeUp .6s ease}
 @keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
@@ -35,11 +30,11 @@ body{background:var(--bg);color:var(--text);min-height:100vh}
 .login-box h1{text-align:center;font-size:1.5rem;margin-bottom:.5rem}
 .login-box p{text-align:center;color:var(--muted);font-size:.9rem;margin-bottom:2rem}
 
-/* Form Inputs */
 .form-group{margin-bottom:1.25rem}
 .form-group label{display:block;margin-bottom:.5rem;font-size:.875rem;font-weight:600;color:var(--muted)}
-.form-group input{width:100%;padding:.875rem 1rem;background:rgba(15,23,42,.6);border:1px solid rgba(148,163,184,.2);border-radius:12px;color:var(--text);font-family:inherit;font-size:.95rem;outline:none;transition:.3s}
-.form-group input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(6,182,212,.15)}
+.form-group input,.form-group textarea,.form-group select{width:100%;padding:.875rem 1rem;background:rgba(15,23,42,.6);border:1px solid rgba(148,163,184,.2);border-radius:12px;color:var(--text);font-family:inherit;font-size:.95rem;outline:none;transition:.3s}
+.form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(6,182,212,.15)}
+.form-group textarea{resize:vertical;min-height:100px}
 .btn{padding:.875rem 1.5rem;border-radius:12px;font-weight:600;font-size:.95rem;cursor:pointer;border:none;transition:.3s;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;font-family:inherit}
 .btn-primary{background:linear-gradient(135deg,var(--primary-light),var(--accent));color:#fff;width:100%}
 .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 25px rgba(59,130,246,.4)}
@@ -48,7 +43,6 @@ body{background:var(--bg);color:var(--text);min-height:100vh}
 .btn-outline{background:transparent;border:1px solid rgba(148,163,184,.3);color:var(--text);width:auto}
 .btn-outline:hover{background:rgba(255,255,255,.05)}
 
-/* Dashboard */
 .topbar{background:rgba(30,41,59,.8);backdrop-filter:blur(20px);border-bottom:1px solid rgba(148,163,184,.1);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
 .topbar h2{font-size:1.1rem}
 .user-info{display:flex;align-items:center;gap:1rem;font-size:.9rem}
@@ -61,14 +55,7 @@ body{background:var(--bg);color:var(--text);min-height:100vh}
 .stat-card .label{font-size:.8rem;color:var(--muted);margin-top:.25rem}
 
 .table-wrapper{background:rgba(30,41,59,.6);border:1px solid rgba(148,163,184,.15);border-radius:20px;overflow:hidden;margin-bottom:2rem}
-.table-header{padding:1.25rem 1.5rem;border-bottom:1px solid rgba(148,163,184,.1);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
-.table-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem; /* Memberi jarak antar elemen jika layar sempit */
-}
+.table-header{padding:1.25rem 1.5rem;border-bottom:1px solid rgba(148,163,184,.1);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
 .table-header h3{font-size:1rem}
 table{width:100%;border-collapse:collapse;font-size:.85rem}
 th{text-align:left;padding:1rem 1.5rem;color:var(--muted);font-weight:600;font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;background:rgba(15,23,42,.3)}
@@ -79,16 +66,9 @@ tr:hover td{background:rgba(59,130,246,.05)}
 .status-proses{background:rgba(245,158,11,.2);color:#fcd34d}
 .status-selesai{background:rgba(16,185,129,.2);color:#6ee7b7}
 
-.leaflet-popup-content-wrapper {
-  border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-}
-.custom-div-icon {
-  background: transparent;
-  border: none;
-}
+.leaflet-popup-content-wrapper { border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+.custom-div-icon { background: transparent; border: none; }
 
-/* Toast */
 .toast{position:fixed;top:1.5rem;right:1.5rem;padding:1rem 1.5rem;background:linear-gradient(135deg,#10b981,#06b6d4);color:#fff;border-radius:12px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.3);transform:translateX(400px);transition:.4s;z-index:3000;max-width:320px}
 .toast.show{transform:translateX(0)}
 .toast.error{background:linear-gradient(135deg,#ef4444,#f97316)}
@@ -100,17 +80,16 @@ tr:hover td{background:rgba(59,130,246,.05)}
   th,td{padding:.75rem 1rem;white-space:nowrap}
 }
 
-/* Modal CSS */
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);display:none;place-items:center;z-index:2000;padding:1rem}
 .modal.open{display:grid}
 .modal-content{background:var(--card);border-radius:24px;padding:2rem;max-width:500px;width:100%;border:1px solid rgba(148,163,184,.2);animation:modalIn .4s cubic-bezier(.34,1.56,.64,1);max-height:90vh;overflow-y:auto;box-shadow: 0 20px 40px rgba(0,0,0,0.5);}
 @keyframes modalIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
-.form-group{margin-bottom:1.25rem}
-.form-group label{display:block;margin-bottom:.5rem;font-size:.875rem;font-weight:600;color:var(--muted)}
-.form-group input,.form-group textarea,.form-group select{width:100%;padding:.875rem 1rem;background:rgba(15,23,42,.6);border:1px solid rgba(148,163,184,.2);border-radius:12px;color:var(--text);font-family:inherit;font-size:.95rem;outline:none;transition:.3s}
-.form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(6,182,212,.15)}
-.form-group textarea{resize:vertical;min-height:100px}
 
+/* Chat bubbles */
+.chat-bubble { padding: 0.75rem; border-radius: 12px; font-size: 0.85rem; max-width: 85%; line-height:1.4; }
+.chat-warga { background: rgba(59,130,246,.2); border: 1px solid rgba(59,130,246,.3); align-self: flex-start; border-bottom-left-radius: 4px; }
+.chat-admin { background: rgba(16,185,129,.15); border: 1px solid rgba(16,185,129,.3); align-self: flex-end; border-bottom-right-radius: 4px; }
+.chat-meta { font-size: 0.7rem; color: var(--muted); margin-bottom: 0.25rem; display: block; }
 </style>
 </head>
 <body>
@@ -126,11 +105,11 @@ tr:hover td{background:rgba(59,130,246,.05)}
     <form onsubmit="handleLogin(event)">
       <div class="form-group">
         <label>Username</label>
-        <input type="text" id="loginUser" required placeholder="Masukkan username">
+        <input type="text" id="loginUser" required placeholder="Masukkan username" autocomplete="username">
       </div>
       <div class="form-group">
         <label>Password</label>
-        <input type="password" id="loginPass" required placeholder="Masukkan password">
+        <input type="password" id="loginPass" required placeholder="Masukkan password" autocomplete="current-password">
       </div>
       <button type="submit" class="btn btn-primary" id="btnLogin">Masuk 🔐</button>
     </form>
@@ -159,9 +138,8 @@ tr:hover td{background:rgba(59,130,246,.05)}
       <div class="stat-card"><div class="num" id="statSelesai">0</div><div class="label">Selesai</div></div>
     </div>
 
-	<!-- Peta Sebaran Aduan -->
     <div class="table-wrapper" style="margin-bottom: 2rem; padding: 1.5rem;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:.5rem;">
         <h3 style="font-size:1rem;">🗺️ Peta Sebaran Aduan</h3>
         <small style="color:var(--muted); font-size:0.75rem;">Hanya menampilkan aduan yang memiliki titik koordinat.</small>
       </div>
@@ -202,7 +180,7 @@ tr:hover td{background:rgba(59,130,246,.05)}
             </tr>
           </thead>
           <tbody id="aduanTableBody">
-            <tr><td colspan="7" style="text-align:center;color:var(--muted)">Memuat data...</td></tr>
+            <tr><td colspan="10" style="text-align:center;color:var(--muted)">Memuat data...</td></tr>
           </tbody>
         </table>
       </div>
@@ -247,7 +225,7 @@ tr:hover td{background:rgba(59,130,246,.05)}
     <div id="chatAdminMessages" style="max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1rem; background: rgba(15,23,42,.4); padding: 1rem; border-radius: 12px;"></div>
     
     <div style="display: flex; gap: 0.5rem;">
-      <input type="text" id="chatAdminInput" placeholder="Ketik balasan..." style="flex:1; padding:0.75rem; border-radius:8px; border:1px solid rgba(148,163,184,.3); background:rgba(15,23,42,.6); color:#fff;">
+      <input type="text" id="chatAdminInput" placeholder="Ketik balasan..." style="flex:1; padding:0.75rem; border-radius:8px; border:1px solid rgba(148,163,184,.3); background:rgba(15,23,42,.6); color:#fff;" onkeypress="if(event.key==='Enter'){event.preventDefault();kirimPesanAdmin();}">
       <button onclick="kirimPesanAdmin()" class="btn btn-primary" style="padding:0.75rem 1.5rem; width:auto;">Kirim</button>
     </div>
     
@@ -261,8 +239,25 @@ tr:hover td{background:rgba(59,130,246,.05)}
 <div class="toast" id="toast"></div>
 
 <script>
-// GANTI DENGAN URL WEB APP ANDA
+// ==========================================
+// KONFIGURASI
+// ==========================================
 const API_URL = 'https://script.google.com/macros/s/AKfycbxirvmiS8VchvTQh5G8Y5WkUZX5jbVKLIbh26OjhaMqXBRlFCLNa9ITOoIWiIYKydcfQw/exec';
+
+// ✅ FIX: Token harus sama persis dengan CONFIG.CLIENT_TOKEN di Code.gs
+const CLIENT_TOKEN = 'KANDARA-XGIRI-2026-xyz';
+
+// ==========================================
+// UTIL: escape HTML (XSS protection)
+// ==========================================
+function esc(s) {
+  return String(s ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
 let currentUser = null;
 let allAduanData = [];
@@ -271,10 +266,16 @@ let markerClusterGroup = null;
 
 // ============ API HELPERS ============
 async function apiPost(payload) {
+  // ✅ FIX: otomatis tambahkan clientToken kecuali action login
+  const body = { ...payload };
+  if (body.action !== 'login') {
+    body.clientToken = CLIENT_TOKEN;
+  }
+  
   const res = await fetch(API_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(body),
     redirect: 'follow'
   });
   return res.json();
@@ -312,7 +313,7 @@ async function handleLogin(e) {
       showDashboard();
       showToast('Selamat datang, ' + res.user.nama);
     } else {
-      showToast(res.message, true);
+      showToast(res.message || 'Login gagal', true);
     }
   } catch(err) {
     showToast('Error: ' + err.message, true);
@@ -335,7 +336,11 @@ function logout() {
 function showDashboard() {
   document.getElementById('loginSection').classList.add('hidden');
   document.getElementById('dashboardSection').classList.remove('hidden');
-  document.getElementById('userNameDisplay').textContent = currentUser.nama;
+  document.getElementById('userNameDisplay').textContent = currentUser.nama || currentUser.username;
+  
+  // Inisialisasi peta saat dashboard muncul
+  setTimeout(() => { initAdminMap(); }, 300); 
+  
   loadAduan();
 }
 
@@ -347,50 +352,43 @@ async function loadAduan() {
     const data = await apiGet('getAllAduan');
     if (data.error) throw new Error(data.error);
     
-    // Simpan ke variabel global
-    allAduanData = data || [];
+    allAduanData = Array.isArray(data) ? data : [];
     
-    // Render dengan data yang sudah disaring
     filterTable();
+    // ✅ FIX: stats dihitung dari data keseluruhan, bukan hasil filter
     updateStats(allAduanData);
   } catch(err) {
-    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--danger)">Gagal memuat: ' + err.message + '</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--danger)">Gagal memuat: ' + esc(err.message) + '</td></tr>';
   }
 }
 
 function filterTable() {
-  const searchTerm = document.getElementById('searchAdmin').value.toLowerCase();
+  const searchTerm = document.getElementById('searchAdmin').value.toLowerCase().trim();
   const statusFilter = document.getElementById('filterStatus').value;
   const kategoriFilter = document.getElementById('filterKategori').value;
 
-  // Proses filter data
   const filteredData = allAduanData.filter(row => {
-    // 1. Cek Pencarian (Tiket, Nama, Lokasi)
     const matchSearch = 
-      (row.TicketID || '').toLowerCase().includes(searchTerm) ||
-      (row.Username || '').toLowerCase().includes(searchTerm) ||
-      (row.Lokasi || '').toLowerCase().includes(searchTerm);
+      String(row.TicketID || '').toLowerCase().includes(searchTerm) ||
+      String(row.Username || '').toLowerCase().includes(searchTerm) ||
+      String(row.Lokasi || '').toLowerCase().includes(searchTerm);
       
-    // 2. Cek Filter Status
     const matchStatus = statusFilter === '' || row.Status === statusFilter;
-    
-    // 3. Cek Filter Kategori
     const matchKategori = kategoriFilter === '' || row.Kategori === kategoriFilter;
 
     return matchSearch && matchStatus && matchKategori;
   });
 
-  // Render ulang tabel dengan data yang sudah disaring
   renderTable(filteredData);
   updateMapMarkers(filteredData); 
-  // Update statistik bagian atas (opsional, memantau hasil filter)
-  updateStats(filteredData);
+  // ✅ FIX: Statistik TIDAK di-update dari hasil filter, agar angka total tetap benar
+  // (opsional: bisa tampilkan counter hasil filter di tempat lain)
 }
 
 function renderTable(data) {
   const tbody = document.getElementById('aduanTableBody');
   if (!data || data.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--muted)">Belum ada aduan.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--muted)">Belum ada aduan yang cocok.</td></tr>';
     return;
   }
   
@@ -402,66 +400,70 @@ function renderTable(data) {
     
     let ratingBintang = '-';
     if (row.Rating && row.Rating !== '') {
-      ratingBintang = '⭐'.repeat(Number(row.Rating));
+      const r = Number(row.Rating);
+      if (!isNaN(r) && r >= 1 && r <= 5) {
+        ratingBintang = '⭐'.repeat(r);
+      }
     }
 
-    const fotoLink = (row.Foto && row.Foto !== '-') 
-      ? `<a href="${row.Foto}" target="_blank" style="color:var(--accent)">Lihat 📸</a>` : '-';
+    // ✅ FIX: Validasi URL foto
+    const fotoUrlSafe = (row.Foto && /^https?:\/\//.test(row.Foto)) ? row.Foto : '';
+    const fotoLink = fotoUrlSafe
+      ? `<a href="${esc(fotoUrlSafe)}" target="_blank" rel="noopener" style="color:var(--accent)">Lihat 📸</a>` 
+      : '-';
       
     const petaLink = (row.Latitude && row.Longitude) 
-      ? `<a href="https://www.google.com/maps?q=${row.Latitude},${row.Longitude}" target="_blank" style="color:var(--accent)">Buka 🗺️</a>` : '-';
+      ? `<a href="https://www.google.com/maps?q=${encodeURIComponent(row.Latitude)},${encodeURIComponent(row.Longitude)}" target="_blank" rel="noopener" style="color:var(--accent)">Buka 🗺️</a>` 
+      : '-';
       
     const tgl = row.Tanggal ? new Date(row.Tanggal).toLocaleDateString('id-ID') : '-';
-    const catatanAman = (row.Catatan_Progres || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    
+    // ✅ FIX: Jangan escape di sini via string replace — pakai data-attribute
+    //         & simpan JSON ke dataset. Ini jauh lebih aman.
+    const rowJSON = esc(JSON.stringify({
+      ticketId: String(row.TicketID || ''),
+      status: String(row.Status || 'Baru'),
+      catatan: String(row.Catatan_Progres || '')
+    }));
 
     let aksi = `<td>
-      <button onclick="openUpdateModal('${row.TicketID}', '${row.Status}', '${catatanAman}')" class="btn btn-primary" style="padding:.4rem .8rem;font-size:.75rem;border-radius:6px;width:auto; margin-bottom:.25rem">
+      <button data-row="${rowJSON}" onclick="openUpdateModalFromBtn(this)" class="btn btn-primary" style="padding:.4rem .8rem;font-size:.75rem;border-radius:6px;width:auto; margin-bottom:.25rem">
         Edit Progres
       </button>
-      <button onclick="bukaChatModal('${row.TicketID}')" class="btn btn-outline" style="padding:.4rem .8rem;font-size:.75rem;border-radius:6px;width:auto">
+      <button data-ticket="${esc(row.TicketID)}" onclick="bukaChatModalFromBtn(this)" class="btn btn-outline" style="padding:.4rem .8rem;font-size:.75rem;border-radius:6px;width:auto">
         💬 Balas
       </button>
     </td>`;
 
     return `<tr>
-      <td><strong>${row.TicketID}</strong></td>
-      <td>${tgl}</td>
-      <td>${row.Username || '-'}</td>
-      <td>${row.Kategori}</td>
-      <td>${row.Lokasi}</td>
+      <td><strong>${esc(row.TicketID)}</strong></td>
+      <td>${esc(tgl)}</td>
+      <td>${esc(row.Username) || '-'}</td>
+      <td>${esc(row.Kategori)}</td>
+      <td>${esc(row.Lokasi)}</td>
       <td>${fotoLink}</td>
       <td>${petaLink}</td>
-      <td><span class="status-badge ${statusClass}">${row.Status}</span></td>
+      <td><span class="status-badge ${statusClass}">${esc(row.Status)}</span></td>
       <td style="color:#fbbf24; font-size:1.1rem">${ratingBintang}</td>
       ${aksi}
     </tr>`;
   }).join('');
 }
 
+// ✅ FIX: Handler tombol via dataset (aman dari tanda kutip di data)
+function openUpdateModalFromBtn(btn) {
+  const data = JSON.parse(btn.dataset.row);
+  openUpdateModal(data.ticketId, data.status, data.catatan);
+}
+function bukaChatModalFromBtn(btn) {
+  bukaChatModal(btn.dataset.ticket);
+}
 
 function updateStats(data) {
   document.getElementById('statTotal').textContent = data.length;
   document.getElementById('statBaru').textContent = data.filter(d => d.Status === 'Baru').length;
   document.getElementById('statProses').textContent = data.filter(d => d.Status === 'Diproses').length;
   document.getElementById('statSelesai').textContent = data.filter(d => d.Status === 'Selesai').length;
-}
-
-async function updateStatus(ticketId, newStatus) {
-  try {
-    const res = await apiPost({
-      action: 'updateStatus',
-      ticketId, newStatus,
-      adminUsername: currentUser.username
-    });
-    if (res.success) {
-      showToast('Status ' + ticketId + ' → ' + newStatus);
-      loadAduan();
-    } else {
-      showToast('Gagal: ' + (res.message || res.error), true);
-    }
-  } catch(err) {
-    showToast('Error: ' + err.message, true);
-  }
 }
 
 // ============ UTILS ============
@@ -477,12 +479,10 @@ function openUpdateModal(ticketId, currentStatus, currentCatatan) {
   document.getElementById('updTicketId').value = ticketId;
   document.getElementById('updStatus').value = currentStatus;
   
-  // Bersihkan formatting aneh pada string catatan
   let cleanCatatan = currentCatatan || '';
   if (cleanCatatan === 'undefined') cleanCatatan = '';
   document.getElementById('updCatatan').value = cleanCatatan;
   
-  // Menggunakan class 'open' agar sesuai dengan CSS
   document.getElementById('updateModal').classList.add('open');
 }
 
@@ -527,33 +527,48 @@ async function submitUpdateStatus(e) {
 // Tutup modal jika klik di luar area
 window.addEventListener('click', e => {
   if(e.target.id === 'updateModal') closeUpdateModal();
+  if(e.target.id === 'chatModal') tutupChatModal();
 });
 
 // ============ FITUR CHAT ADMIN ============
 let currentChatTicket = null;
+let chatPollInterval = null;  // ✅ FIX: auto-refresh chat
 
 function bukaChatModal(ticketId) {
   currentChatTicket = ticketId;
   document.getElementById('chatTicketId').textContent = ticketId;
   document.getElementById('chatModal').classList.add('open');
   loadChatAdmin(ticketId);
+  
+  // ✅ FIX: auto-refresh chat tiap 5 detik selama modal terbuka
+  if (chatPollInterval) clearInterval(chatPollInterval);
+  chatPollInterval = setInterval(() => {
+    if (currentChatTicket) loadChatAdmin(currentChatTicket, true);
+  }, 5000);
 }
 
 function tutupChatModal() {
   document.getElementById('chatModal').classList.remove('open');
   currentChatTicket = null;
+  if (chatPollInterval) {
+    clearInterval(chatPollInterval);
+    chatPollInterval = null;
+  }
 }
 
-async function loadChatAdmin(ticketId) {
+async function loadChatAdmin(ticketId, silent = false) {
   const chatBox = document.getElementById('chatAdminMessages');
-  chatBox.innerHTML = '<div style="text-align:center; font-size:0.8rem; color:var(--muted);">Memuat chat...</div>';
+  if (!silent) {
+    chatBox.innerHTML = '<div style="text-align:center; font-size:0.8rem; color:var(--muted);">Memuat chat...</div>';
+  }
   
   try {
-    const res = await fetch(API_URL + '?action=getPesan&ticketId=' + ticketId);
+    // ✅ FIX: encodeURIComponent
+    const res = await fetch(API_URL + '?action=getPesan&ticketId=' + encodeURIComponent(ticketId));
     const result = await res.json();
     
     if (result.success && result.data.length > 0) {
-      chatBox.innerHTML = result.data.map(msg => {
+      const html = result.data.map(msg => {
         const isAdmin = msg.Pengirim === 'Admin';
         const bubbleClass = isAdmin ? 'chat-admin' : 'chat-warga';
         const name = isAdmin ? 'Anda (Admin)' : msg.Pengirim;
@@ -561,14 +576,22 @@ async function loadChatAdmin(ticketId) {
         
         return `
           <div class="chat-bubble ${bubbleClass}">
-            <span class="chat-meta">${name} • ${tgl}</span>
-            ${msg.Pesan}
+            <span class="chat-meta">${esc(name)} • ${esc(tgl)}</span>
+            ${esc(msg.Pesan)}
           </div>
         `;
       }).join('');
-      chatBox.scrollTop = chatBox.scrollHeight;
+      
+      // ✅ FIX: hindari scroll jump saat polling jika pesan baru belum ada
+      if (chatBox.dataset.lastHtml !== html) {
+        chatBox.innerHTML = html;
+        chatBox.dataset.lastHtml = html;
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
     } else {
-      chatBox.innerHTML = '<div style="text-align:center; font-size:0.8rem; color:var(--muted);">Belum ada percakapan.</div>';
+      if (!silent) {
+        chatBox.innerHTML = '<div style="text-align:center; font-size:0.8rem; color:var(--muted);">Belum ada percakapan.</div>';
+      }
     }
   } catch(e) { console.error(e); }
 }
@@ -590,9 +613,9 @@ async function kirimPesanAdmin() {
     
     if (res.success) {
       input.value = '';
-      loadChatAdmin(currentChatTicket); // Refresh chat
+      loadChatAdmin(currentChatTicket); // refresh instan
     } else {
-      showToast('Gagal mengirim pesan', true);
+      showToast('Gagal: ' + (res.message || res.error), true);
     }
   } catch(e) {
     showToast('Error koneksi', true);
@@ -602,16 +625,10 @@ async function kirimPesanAdmin() {
   }
 }
 
-// Tutup modal jika klik di luar
-window.addEventListener('click', e => {
-  if(e.target.id === 'chatModal') tutupChatModal();
-});
-
+// ============ PETA ============
 function initAdminMap() {
-  // Cegah inisialisasi ganda
   if (adminMap) return;
 
-  // Koordinat tengah (Sirampog)
   const defaultLat = -7.2333;
   const defaultLng = 108.8833;
 
@@ -621,30 +638,27 @@ function initAdminMap() {
     attribution: '© OpenStreetMap'
   }).addTo(adminMap);
 
-  // Inisialisasi Cluster Group
   markerClusterGroup = L.markerClusterGroup();
   adminMap.addLayer(markerClusterGroup);
 }
+
 function updateMapMarkers(data) {
   if (!adminMap || !markerClusterGroup) return;
   
-  // Hapus marker lama
   markerClusterGroup.clearLayers();
 
   let validMarkers = 0;
 
   data.forEach(row => {
-    // Hanya render jika ada koordinat Lat & Lng
     if (row.Latitude && row.Longitude && row.Latitude !== '' && row.Longitude !== '') {
       const lat = parseFloat(row.Latitude);
       const lng = parseFloat(row.Longitude);
+      if (isNaN(lat) || isNaN(lng)) return;
       
-      // Pilih warna berdasarkan status
-      let markerColor = '#3b82f6'; // Biru (Baru)
-      if (row.Status === 'Diproses') markerColor = '#f59e0b'; // Kuning
-      if (row.Status === 'Selesai') markerColor = '#10b981'; // Hijau
+      let markerColor = '#3b82f6';
+      if (row.Status === 'Diproses') markerColor = '#f59e0b';
+      if (row.Status === 'Selesai') markerColor = '#10b981';
 
-      // Custom Icon
       const customIcon = L.divIcon({
         className: 'custom-div-icon',
         html: `<div style="background-color:${markerColor}; width: 14px; height: 14px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 5px rgba(0,0,0,0.5);"></div>`,
@@ -654,13 +668,13 @@ function updateMapMarkers(data) {
 
       const marker = L.marker([lat, lng], { icon: customIcon });
       
-      // Konten Popup
+      // ✅ FIX: escape semua field di popup
       const popupContent = `
         <div style="font-family: 'Plus Jakarta Sans', sans-serif; min-width: 150px;">
-          <strong style="color:${markerColor}; font-size:14px;">${row.TicketID}</strong><br>
-          <span style="font-size:12px; color:#333;">${row.Kategori}</span><br>
-          <span style="font-size:11px; color:#666;">📍 ${row.Lokasi}</span><br>
-          <span style="font-size:11px; font-weight:bold;">Status: ${row.Status}</span>
+          <strong style="color:${markerColor}; font-size:14px;">${esc(row.TicketID)}</strong><br>
+          <span style="font-size:12px; color:#333;">${esc(row.Kategori)}</span><br>
+          <span style="font-size:11px; color:#666;">📍 ${esc(row.Lokasi)}</span><br>
+          <span style="font-size:11px; font-weight:bold;">Status: ${esc(row.Status)}</span>
         </div>
       `;
       
@@ -670,32 +684,30 @@ function updateMapMarkers(data) {
     }
   });
 
-  // Jika ada marker, sesuaikan zoom peta agar semua terlihat
   if (validMarkers > 0) {
-    adminMap.fitBounds(markerClusterGroup.getBounds(), { padding: [30, 30] });
+    try {
+      adminMap.fitBounds(markerClusterGroup.getBounds(), { padding: [30, 30] });
+    } catch(e) {}
   }
 }
-function showDashboard() {
-  document.getElementById('loginSection').classList.add('hidden');
-  document.getElementById('dashboardSection').classList.remove('hidden');
-  document.getElementById('userNameDisplay').textContent = currentUser.nama;
-  
-  // Inisialisasi peta saat dashboard muncul
-  setTimeout(() => { initAdminMap(); }, 300); 
-  
-  loadAduan();
-}
 
-// Cek Sesi Login saat halaman dimuat
+// ============ CEK SESI LOGIN ============
 window.addEventListener('DOMContentLoaded', () => {
   const saved = sessionStorage.getItem('sirampog_admin');
   if (saved) {
     try {
-      currentUser = JSON.parse(saved);
-      showDashboard();
+      const u = JSON.parse(saved);
+      // ✅ FIX: validasi role saat restore sesi
+      if (u && u.role === 'admin' && u.username) {
+        currentUser = u;
+        showDashboard();
+      } else {
+        sessionStorage.removeItem('sirampog_admin');
+      }
     } catch(e) { sessionStorage.removeItem('sirampog_admin'); }
   }
 });
 </script>
 </body>
 </html>
+
